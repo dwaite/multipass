@@ -112,9 +112,9 @@ informative:
 ---
 abstract
 
-Must often, user attributes are exchanged online between systems and organizations which have a local or bilateral business arrangement, with user consent and privaccy provided as desired by the organization(s) involved.
+Most often user attributes are exchanged online between systems and organizations which have a local or bilateral business arrangement, with user consent and privaccy provided as desired by the organization(s) involved.
 
-MultiPass is a Verifiable Credentials ({{W3C.REC-vc-data-model-20191119}}) system meant for an organization to supply attributes, and for other organizations to rely upon unilaterally. This is done by having a local user agent (sometimes referred to as a wallet), which allows this exchange to be done in a manner which can respect user privacy and decisions around disclosure. 
+MultiPass is a Verifiable Credentials ({{W3C.REC-vc-data-model-20191119}}) system intended for an organization to supply attributes unilaterally, and for other organizations to rely upon those attributes without having a relationship to the supplier. This is accomplished by leveraging a local user agent (sometimes referred to as a wallet), which allows this exchange to be done in a manner which can respect user privacy and support informed decisions around disclosure. 
 
 This specification provides a mechanism to retrieve single-use tickets which bundle cryptographically secure attributes in a non-correlatable, incrementally disclosable manner.
 
@@ -127,7 +127,7 @@ In existing identity systems such as SAML ({{SAML.Core}}) and OpenID Connect ({{
 
 Verifiable Credential systems aim to introduce a new role into the system, that of a user agent which works to mediate this exchange of information and to decouple entities from needing a business relationship. This user agent, referred to from this point as a *Holder*, can implement a consistent level of informed consent onto the exchanged information.
 
-This specification describes a system for fetching attribute credentials, known as *Multipass tickets*, from an issuer. For compatibility with existing identity systems, this issuer acts as a protected resource under the OAuth 2.0 Authorization Framework described in ({{RFC6749}}). There may be other methods for retrieving multipass tickets outside of OAuth 2, which are out of scope of this specification.
+This specification describes a system for fetching attribute credentials, known as *Multipass Tickets*, from an issuer. For compatibility with existing identity systems, this issuer acts as a protected resource under the OAuth 2.0 Authorization Framework described in ({{RFC6749}}). There may be other methods for retrieving multipass tickets outside of OAuth 2, which are out of scope of this specification.
 
 This specification also describes the format of the ticket in the response, as well as how to process, send, and verify the response.
 
