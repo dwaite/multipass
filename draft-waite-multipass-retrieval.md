@@ -241,13 +241,19 @@ Attribute verification consists of an ephemeral public key (as a "jwk" member), 
 
 A multipass contains multiple individually protected attributes, allowing for a statement about the resource owner previously to give only the information requested by a verifier. The attribute verification element specifies how to verify these individual attributes.
 
-Attribues are represented as individual JWS-protected JSON documents. The attributes MUST be in JSON-LD format, with several additional restrictions:
+Attribues are represented as individual JWS-protected documents in a restricted JSON-LD format. These restrictions are meant to create an extensible format where:
 
-1. Each attribute is a statement about the base node, which is the resource owner
-2. The JSON-LD MUST be in compacted form, without any supplied context
-3. Two attributes MUST NOT contain identical or conflicting properties.
-4. Two attributes containing the same property MUST be interpreted as an unordered set of values.
-5. An attribute MAY indicate the "@id" of the resource owner, a value representing the specific resource owner. What information may be dereferenced by this value is out of scope.
-6. Each node within an attribute (other than the resource owner itself) MUST NOT contain both an identifier and properties. For example, a property for manager may include a node with properties about the manager, or an identifier referencing the manager, but not both.
+- The document represented by each attribute is about the resource owner
+- Properties from multiple attribute documents can be interpreted as a composition without needing to resolve conflicts
+- Verifiers do not need a full JSON-LD and RDF toolset to understand attributes
+- Attribute data is limited to a tree structure (rather than a directed cyclic graph structure)
+- An issuer can not attempt to assert authoritative properties about entities other than the resource owner.
 
-These restrictions result in a JSON format where URI keyed attributes provide issuer-attested data about the resource owner. These JSON objects, when presented to and verified by the verifier, MAY be combined into a single JSON-LD document.
+The restrictions are as follows:
+
+1. Each document represents the resource owner as the base or root node.
+2. The JSON-LD MUST be in compacted form and MUST be specified without any context. The document MUST limit the use of special keywords to "@id", "@type", "@list", "@json", "@language", "@value", and "@direction".  The use of "@direction" is DISCOURAGED due to compatibility with various RDF tools and formats. Use of "@value" is NOT RECOMMENDED except when neccessary to indicate a language and/or direction.
+3. Two attributes MUST NOT contain conflicting properties. Multiple attributes containing the same property on the same node MUST be interpreted as an unordered set of values.
+4. The document MUST NOT attempt to present authoritative information on any entity other than the resource owner. Each node within an attribute (other than the resource owner itself) MUST either be a node reference consisting of an IRI, be an unnamed node, or be a locally named node.
+5. Node references to named nodes MAY be used to divide properties of a node among multiple attributes. Named nodes MUST only be referenced by one property of one node other than the named node itself, which will be its parent node in the document tree. A named node MUST NOT reference itself.
+6. An attribute MAY indicate the "@id" of the resource owner to indicate a unique IRI for the resource owner in the context of the issuer. What information may be dereferenced at this location or what authorization might be required is out of scope of this specification.
