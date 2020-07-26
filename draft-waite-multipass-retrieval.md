@@ -1,8 +1,8 @@
 ---
-title: MultiPass Token Retriaval
-abbrev: MultiPass Token Retriaval
+title: MultiPass Ticket Retriaval
+abbrev: MultiPass Retriaval
 docname: draft-waite-multipass-retrieval-00
-date: 2020-07-11
+date: 2020-07-22
 category: exp
 
 ipr: trust200902
@@ -11,61 +11,60 @@ workgroup: None
 keyword: Internet-Draft
 
 stand_alone: yes
-pi: [toc, sortrefs, symrefs]
+pi: [toc, sortrefs, symrefs, comments]
 
 author:
  -
     ins: D. Waite
-    name: David Waite
     organization: Ping Identity
     email: david@alkaline-solutions.com
 
 normative:
-  I-D.ietf-oauth-security-topics:
+  # URI:        RFC3986
+  OAUTH2:     RFC6749
+  JSON:       RFC7159
+  JWK:        RFC7517
+  # JWA:        RFC7518
+  JWT:        RFC7519
+  # I-D.ietf-oauth-security-topics:
   W3C.REC-vc-data-model-20191119: # VC Data Model
-    target: https://www.w3.org/TR/2019/CR-verifiable-claims-data-model-20190328
+    target: https://www.w3.org/TR/2019/REC-vc-data-model-20191119/
     title: Verifiable Credentials Data Model 1.0
     author:
       - ins: M. Sporny
       - ins: G. Noble
-      - ins: D. Burnett
       - ins: D. Longley
-    date: March 28 2019
-  # OASIS Standard
-  OASIS.saml-core-2.0-os:
-    target: http://docs.oasis-open.org/security/saml/v2.0/saml-core-2.0-os.pdf
-    title: Assertions and Protocols for the OASIS Security Assertion Markup Language (SAML) V2.0
-    author:
-      - ins: S. Cantor
-      - ins: J. Kemp
-      - ins: R. Philpott
-      - ins: E. Maler
-    date: March 2005
-  RFC2119: # RFC Keywords
-  RFC6749: # OAuth 2.0
-  RFC3986: # URI Syntax
-  RFC7159: # JSON
-  RFC7519: # JWT
-  RFC7518: # JWA
+      - ins: D. Burnett
+      - ins: B. Zundel
+    date: November 19 2019
 
 informative:
-  RFC2818: # HTTP over TLS
-  RFC3629: # UTF8
-  RFC4949: # Internet Security Glossary
-  RFC7231: # HTTP 1.1 Semantics and Content
-  RFC7234: # HTTP 1.1 Caching
-  RFC7595: # Guidelines, Registration Procedures for URI Schemes
-  RFC8126: # Case ambiguity in RFC keywords
-  RFC8252: # OAuth for Native Apps
-  RFC8446: # TLS 1.3
-  USASCII: # 7 bit ASCII
-    title: "Coded Character Set -- 7-bit American Standard Code for Information Interchange, ANSI X3.4"
-    author:
-      name: "American National Standards Institute"
-    date: 1986
-  W3C.REC-html401-19991224: # HTML 4.01
-  W3C.REC-xml-20081126: # XML 1.0 5th Ed
-  OpenID: # Openid Connect Core 1.0
+  # HTTPTLS:        RFC2818 # HTTP over TLS
+  # UTF8:           RFC3629 # UTF8
+  SECURITY:  RFC4949 # Internet Security Glossary
+  # COOKIES:        RFC6265 # HTTP State Management
+  # OAUTHTHREAT:    RFC6819 # OAuth 2.0 Threat Model and Security Considerations
+  # HTTPSYNTAX:     RFC7230 # HTTP 1.1: Syntax and Routing
+  # HTTPSEMANTICS:  RFC7231 # HTTP 1.1 Semantics and Content
+  # HTTPCACHING:    RFC7234 # HTTP 1.1 Caching
+  # HTTPAUTH:       RFC7235 # HTTP 1.1: Authentication
+  # OAUTHREG:       RFC7591 # OAuth Dynamic Client Registration
+  # OAUTHPKCE:      RFC7636 # OAUTH PKCE
+  JWTPOP:         RFC7800 # PoP Key Semantics for JWTs
+  # APPAUTH:        RFC8252 # OAuth for Native Apps
+  OAUTHMETA:      RFC8414 # OAuth Server Metadata
+  # TLS13:          RFC8446
+  # OAUTHMTLS:      RFC8705 # OAuth MTLS client authentication/binding
+  # OAUTHRESOURCE:  RFC8707 # Resource Indicators
+  OASIS.saml-core-2.0-os:
+  # USASCII:                # 7 bit ASCII
+  #   title: "Coded Character Set -- 7-bit American Standard Code for Information Interchange, ANSI X3.4"
+  #   author:
+  #     name: "American National Standards Institute"
+  #   date: 1986
+  # W3C.REC-html401-19991224: # HTML 4.01
+  # W3C.REC-xml-20081126: # XML 1.0 5th Ed
+  OpenID.Core: # Openid Connect Core 1.0
     title: "OpenID Connect Core 1.0"
     target: https://openiD.net/specs/openiD-connect-core-1_0.html
     date: November 8, 2014
@@ -75,80 +74,113 @@ informative:
       - ins: M. Jones
       - ins: B. de Medeiros
       - ins: C. Mortimore
-  OpenID.Messages: # Openid Connect Messages
-    title: "OpenID Connect Messages 1.0"
+  # OpenID.Messages: # Openid Connect Messages
+  #   title: "OpenID Connect Messages 1.0"
+  #   author:
+  #     - ins: N. Sakimura
+  #     - ins: J. Bradley
+  #     - ins: M. Jones
+  #     - ins: B. de Medeiros
+  #     - ins: C. Mortimore
+  #     - ins: E. Jay
+  #   date: June 2012
+  #   target: http://openid.net/specs/openid-connect-messages-1_0.html
+  # owasp_redir: # OWASP Cheet Sheet Series - Unvalidated Redirects
+  #   title: "OWASP Cheat Sheet Series - Unvalidated Redirects and Forwards"
+  #   target: https://cheatsheetseries.owasp.org/cheatsheets/Unvalidated_Redirects_and_Forwards_Cheat_Sheet.html
+  #   date: 2020
+  ANONCRED:
+    title: "An Efficient System for Non-trasferable Anonymous Credentials with Optional Anonymity Revocation"
+    target: https://eprint.iacr.org/2001/019.pdf
     author:
-      - ins: N. Sakimura
-      - ins: J. Bradley
-      - ins: M. Jones
-      - ins: B. de Medeiros
-      - ins: C. Mortimore
-      - ins: E. Jay
-    date: June 2012
-    target: http://openid.net/specs/openid-connect-messages-1_0.html
-  owasp_redir: # OWASP Cheet Sheet Series - Unvalidated Redirects
-    title: "OWASP Cheat Sheet Series - Unvalidated Redirects and Forwards"
-    target: https://cheatsheetseries.owasp.org/cheatsheets/Unvalidated_Redirects_and_Forwards_Cheat_Sheet.html
-    date: 2020
-  RFC6265: # HTTP State Management
-  RFC6819: # OAuth 2.0 Thread Model and Security Considerations
-  RFC7230: # HTTP 1.1: Syntax and Routing
-  RFC7235: # HTTP 1.1: Authentication
-  RFC7591: # OAuth Dynamic Client Registration
-  RFC7636: # OAUTH PKCE
-  RFC7800: # PoP Key Semantics for JWTs
-  RFC8414: # OAuth Server Metadata
-  RFC8705: # OAuth MTLS client authentication/binding
-  RFC8707: # Resource Indicators
-  SAML.Core:
-    title: Assertions and Protocols for the OASIS Security Assertion Markup Language
-    target: http://docs.oasis-open.org/security/saml/v2.0/saml-core-2.0-os.pdf
-    author:
-      - name: Scott Cantor
-      - name: John Kemp
-      - name: Rob Philpott
-      - name: Eve Maler
-    date: March 15 2005
+      - ins: J. Camenisch
+      - ins: A. Lysyanskaya
+    date: 2001
+  
+
 ---
 abstract
 
-Most often user attributes are exchanged online between systems and organizations which have a local or bilateral business arrangement, with user consent and privaccy provided as desired by the organization(s) involved.
+User authentication and attributes are exchanged online today between organizations based on bilateral business arrangements, with user consent and privacy provided as desired by the organization(s) involved.
 
-MultiPass is a Verifiable Credentials ({{W3C.REC-vc-data-model-20191119}}) system intended for an organization to supply attributes unilaterally, and for other organizations to rely upon those attributes without having a relationship to the supplier. This is accomplished by leveraging a local user agent (sometimes referred to as a wallet), which allows this exchange to be done in a manner which can respect user privacy and support informed decisions around disclosure. 
+MultiPass is a system intended for an organization to issue credentials unilaterally, where other organizations can evaluate credentials without having a relationship to the issuing party. This is accomplished by leveraging a software agent, which allows this exchange to be done in a manner which can respect user privacy and support informed decisions around disclosure.
 
-This specification provides a mechanism to retrieve single-use tickets which bundle cryptographically secure attributes in a non-correlatable, incrementally disclosable manner.
+This specification provides a mechanism to retrieve single-use tickets, which bundle cryptographically secure credentials in a non-correlatable, selectively disclosable manner.
 
 ---
 middle
 
-# Introduction {#introduction}
+# Introduction
+{:#introduction}
 
-In existing identity systems such as SAML ({{SAML.Core}}) and OpenID Connect ({{OpenID}}), two entities share identity information about the user with regard the entities' existing bilateral business relationship. The exchange of this authentication and claimed attribute information may more may not be something the user is informed of or consents to, depending on the policies and regulations that the entities operate under.
+Existing multi-organizatinal identity systems such as SAML ({{OASIS.saml-core-2.0-os}}) and OpenID Connect ({{OpenID.Core}}) are designed to share authentication information and claims about the user across organizations. The basis for this exchange is typically a bilateral business relationship and mutual trust between the organizations. The user may or may not have been informed of have consented to this disclosure, depending on the policies and the regulations that the entities operate under.
 
-Verifiable Credential systems aim to introduce a new role into the system, that of a user agent which works to mediate this exchange of information and to decouple entities from needing a business relationship. This user agent, referred to from this point as a *Holder*, can implement a consistent level of informed consent onto the exchanged information.
+Verifiable Credential systems {{W3C.REC-vc-data-model-20191119}} aim to introduce a new role into the system, that of a software agent which mediates this exchange of information about the user. This agent decouples the entities from needing a business relationship, as well as takes responsibility for protecting privacy and providing the user with the opportunity for informed disclosure and consent.
 
-This specification describes a system for fetching attribute credentials, known as *Multipass Tickets*, from an issuer. For compatibility with existing identity systems, this issuer acts as a protected resource under the OAuth 2.0 Authorization Framework described in ({{RFC6749}}). There may be other methods for retrieving multipass tickets outside of OAuth 2, which are out of scope of this specification.
+This specification describes a container for retrieving a set of credentials from a single issuer, known as a *Multipass Ticket*. These tickets are single use, cryptographically verifiable statements by a particular issuer. For compatibility with existing identity systems, this issuer acts as a protected resource under the OAuth 2.0 Authorization Framework described in ({{OAUTH2}}). There may be other methods for retrieving multipass tickets, which are out of scope of this specification.
 
-This specification also describes the format of the ticket in the response, as well as how to process, send, and verify the response.
+This specification also defines mechanisms to prove possession of a key associated with the ticket to the relying party, and one mechanism for verifying credentials were asserted by the issuer.
 
-This specification does not define a profile for requesting or sending multipass tickets to recipients, which may operate in roles such as "Relying Parties" or "Verifiers" within such profiles.
+Finally, this specification describes the data expected in a request by a party for credentials, as well as the cryptographic format of the presentation of those credentials back to the requesting party. This specification does not define a profile for requesting or sending multipass tickets to recipients, which may operate in roles such as "Relying Parties" or "Verifiers" within such profiles.
+
+## Notational Conventions
+
+{::boilerplate bcp14+}
+
+Certain security-related terms are to be understood in the sense defined in {{SECURITY}}.  These terms include, but are not limited to,
+"air gap", "anonymity", "assymmetric cryptography", "attribute", "authentication", "authorization", "certificate", "challenge-response", "credential", "data integrity", "domain", "domain name", "enclave", "encryption", "ephemeral key", "expire", "fresh", "identifier", "identity", "identity proofing", "integrity", "privacy", "private key", "proof-of-possession", "protocol", "public key", "repudiation", "sign", "signature", "single sign-on", "steganography", "trust", "validate", "validity period", "verify", and "zero-knowledge proof"
+
+Unless otherwise noted, all the protocol parameter names and values
+are case sensitive.
+
+This specification also defines or revises the following terms:
+
+Credential:
+: A data object representing some aspects of the identity of the subject. This includes (but is not limited to) attributes about the subject, an event associated with the subject, identifiers unique to the subject, a definition of how to authenticate a party as the subject, and authorizations of the subject. This specification places requirements on credentials but does not dictate a format for these data objects.
+
+Selective Disclosure:
+: In the context of set of credentials, or of an individual credential format which supports selective disclosure, the ability to release just a subset of the amount of information available when given to a verifier.
+
+Ticket:
+: In this context, a multipass ticket. A cryptographic message with a mechanism to verify proof of possession by the holder, and to define how to verify credentials are being asserted by the issuer. To prevent correlation between parties, this ticket is meant to be single-use.
 
 ## Roles
 
-Multipass defines three roles beyond OAuth:
+~~~ text/plain
+               requests                  requests
++-----------+  multipass  +-----------+ credentials +-----------+
+|           |<------------|           |<------------|           |
+|  Issuer   |             |  Holder   |             | Verifier  |
+|           |------------>|           |------------>|           |
++-----------+   issues    +-----------+             +-----------+
+      ^        multipass                 presents
+      |                                 credentials
+      |
+      |                   +-----------+
+      |                   |           |
+      +-------------------|  Subject  |
+              authorizes  |           |
+                Holder    +-----------+
+~~~
+{: #fig-roles title="Roles"}
 
-"Holder":
-:   An application which acts as a client, requesting and holding onto multipass tickets on behalf of the resource owner. This may also be referred to sometimes as a "wallet."
+Multipass defines four roles beyond OAuth:
 
-"Issuer":
-:   An application issuing multipass tokens to the holder. In the context of this specification, this entity is an OAuth 2 protected resource. These tokens may represent attributes about the resource owner, or of another party that has delegated access.
+Subject:
+: An entity being described by the issue, such as the OAuth resource owner/end-user.
 
-"Verifier":
-:   An application requesting multipass tickets which meet certain requirements, and which can verify whether multipass tickets meet their requirements for action to be taken.
+Holder:
+: An application which acts as a client, requesting and holding onto multipass tickets on behalf of the subject. This may also be referred to sometimes as a "wallet." This application may be operated by a party other than the subject.
+
+Issuer:
+: An application issuing multipass tickets to the holder. In the context of this specification, this entity is an OAuth 2 protected resource. This party issues tickets containing credentials which other parties trust.
+
+Verifier:
+: An application requesting credentials which meet certain requirements, such as which issuers are supplying them, and which can verify the presented credentials.
 
 ## Protocol Flow
 
-~~~~~~~~~~
+~~~~~~~~~~ text/plain
      +--------+                               +---------------+
      |        |<-(1a)- OAuth grant request -->| Authorization |
      |        |                               |     Server    |
@@ -169,91 +201,144 @@ Multipass defines three roles beyond OAuth:
 ~~~~~~~~~~
 {: #fig-protocol-flow title="Abstract Protocol Flow"}
 
-The abstract flow illustrated in {{fig-protocol-flow}} describes the interaction
-Between the entities and includes the following steps:
+The abstract flow illustrated in {{fig-protocol-flow}} describes the interaction between the holder, authorization server and issuer to retrieve tickets, as well as the interaction between the holder and verifier to present credentials. In more detail:
 
-1. The Holder seeks authorization from the Authorization Server as described in {{RFC6749}}. The scope for interacting with an issuer is "multipass".
+1. The Holder seeks authorization from the Authorization Server as described in ({{OAUTH2}}), by specifying a scope of `multipass`.
 
-2. The Holder requests a multipass ticket using the acquired access token. This request includes an ephemeral public key, which should be unique per request and be different from any cryptographic keys used for sender constrained token mechanisms (such as DPoP).
+2. The Holder requests a multipass ticket using the acquired access token. This request includes an ephemeral public key, which should be unique per request and be different from any cryptographic keys used by sender constrained token mechanisms (such as DPoP).
 
-3. The holder returns a single-use multipass ticket, with confirmation set to the supplied ephemeral key.
+3. The holder returns a single-use multipass ticket, with confirmation set to use the supplied ephemeral key.
 
-4. A verifier requests a presentation with specific parameters which match the multipass ticket previously issued. If a valid ticket is not available at the holder (due to time-based expiry or all cached tickets being used) steps 2 and 3 may be repeeated here to fetch a new multipass ticket.
+4. Seperately, a verifier requests a presentation with requirements that which match the multipass ticket previously issued and some subset of associated credentials. If a valid ticket is not available at the holder (such as exhaustion of any ticket cache), steps 2 and 3 may be repeated to fetch a new multipass ticket.
 
 5. After the holder confirms the user wishes to share the information requested with the verifier, the presentation response is returned based on the multipass ticket.
 
 ## Multipass ticket format
 
-A multipass ticket is single use cryptographic package used to form a presentation response. It consists of a collection of individually packaged attributes about the resource owner, which can be selectively disclosed to minimally meet the needs of the verifier.
+A multipass ticket is single-use cryptographic package used to form a credential presentation to a verifier. It consists of a collection of individually packaged credentials about the resource owner, which may be selectively disclosed to minimally meet the needs of the verifier.
 
-~~~~~~~~~~
-┌──────────────────────────────────────────┐
-│                                          │
-│                Multipass                 │
-│                                          │
-│ ┌──────────────────────────────────────┐ │
-│ │                                      │ │
-│ │           Issuer Statement           │ │
-│ │                                      │ │
-│ └──────────────────────────────────────┘ │
-│ ┌──────────────────────────────────────┐ │
-│ │                                      │ │
-│ │          Holder Usage Data           │ │
-│ │                                      │ │
-│ └──────────────────────────────────────┘ │
-│ ┌──────────────────────────────────┐     │
-│ │                                  ├─┐   │
-│ │            Attributes            │ ├─┐ │
-│ │                                  │ │ │ │
-│ └─┬────────────────────────────────┘ │ │ │
-│   └─┬────────────────────────────────┘ │ │
-│     └──────────────────────────────────┘ │
-└──────────────────────────────────────────┘
+~~~~~~~~~~ text/plain
++------------------------------------------+
+|                                          |
+|             Multipass Ticket             |
+|                                          |
+| +--------------------------------------+ |
+| |                                      | |
+| |           Issuer Statement           | |
+| |                                      | |
+| +--------------------------------------+ |
+|                                          |
+| +----------------------------------+     |
+| |                                  +-+   |
+| |        Credential Statements     | +-+ |
+| |                                  | | | |
+| +-+--------------------------------+ | | |
+|   +-+--------------------------------+ | |
+|     +----------------------------------+ |
+|                                          |
++------------------------------------------+
 ~~~~~~~~~~
 {: #fig-multipass-structure title="Multipass Structure"}
 
-## Issuer Statement
+### Issuer Statement
+{: #issuer-statement}
 
 The issuer statement is a signed JWT containing information which is both non-identifying and non-correlating of the user, which will be disclosed to all verifiers.
 
-The JWT contains the following keys, defined by ({{RFC7519}}) and ({{RFC7800}})
+The JWT contains the following keys, defined by ({{JWT}}) and ({{JWTPOP}})
 
-"iss":
-:    REQUIRED.  This value MUST uniquely identifies the issuer. It SHOULD be a "https" scheme URL usable for metadata discovery per ({{RFC8414}}).
-"aud":
+{: vspace="0"}
+iss
+:    REQUIRED.  This value MUST uniquely identifies the issuer. It SHOULD be a "https" scheme URL usable for metadata discovery per ({{OAUTHMETA}}).
+
+aud
 :    OPTIONAL. This value indicates recipient(s) that the JWT is intended for. If an audience is specified, the multipass MUST NOT be presented to a recipient that is not part of that audience.
-"exp":
-:    REQUIRED. The expiration time after which the multipass MUST NOT be presented to a verifier and MUST NOT be accepted by a verifier for processing.  A holder MAY use expiry to proactively acquire one or more new multipasses.
-"jti":
-:    REQUIRED. A unique identifier for the JWT. MAY be used for communicating out-of-band from a verifier to an issuer about this multipass and the associated resource owner, e.g. in abuse scenarios.
-"cnf":
-:    REQUIRED. Used to provide proof-of-possession of the holder to the verifier.
-"atv":
-:    OPTIONAL. Used to provide cryptographic verification of attributes.
 
-### Attribute Verification
+exp
+:    REQUIRED. The expiration time after which the multipass MUST NOT be presented to a verifier and MUST NOT be accepted by a verifier for processing.  A holder MAY use expiry to proactively acquire one or more new multipasses. The expiration SHOULD take into account the validity period of associated credentials. It is RECOMMENDED that expiry times have low precision or other mechanisms to prevent statistical correlation of multiple passes retrieved by the holder simultaneously.
 
-The Attribute Verification object within the issuer statement describes how to verify that any attributes presented alongside the issuer statement are valid.
+jti
+:    OPTIONAL. A unique identifier for the JWT. MAY be used for communicating out-of-band from a verifier to an issuer about this multipass and the associated resource owner.
 
-Attribute verification consists of an ephemeral public key (as a "jwk" member), used to sign each attribute individually via JWS.
+cnf
+:    REQUIRED. Used to provide proof-of-possession of the holder to the verifier. It is RECOMMENDED that this be a public key in the form of a point on the P-256 curve.
 
-## Attribute format
+cdv
+:    OPTIONAL. Used to provide cryptographic verification of credentials.
 
-A multipass contains multiple individually protected attributes, allowing for a statement about the resource owner previously to give only the information requested by a verifier. The attribute verification element specifies how to verify these individual attributes.
+Issuer statements MAY provide additional information. This additional information MUST NOT contain identity information of the subject, or be usable to uniquely identify the subject or correlate the subject across multiple verifiers.
 
-Attribues are represented as individual JWS-protected documents in a restricted JSON-LD format. These restrictions are meant to create an extensible format where:
+As a specific example, this information MUST NOT indicate the subject belong to a subset at a particular issuer who have access to a particular credential, such as by including an additional mechanism to verify that credential format. The `cdv` property is provided specifically so that that verification information can be included separately from the issuer statement, as part of the credential itself. The issuer statement MAY include such information if it does not distinguish the subject as belonging to a subset, but a requirement to do so might serve as a limitation of that credential format in other environments.
 
-- The document represented by each attribute is about the resource owner
-- Properties from multiple attribute documents can be interpreted as a composition without needing to resolve conflicts
-- Verifiers do not need a full JSON-LD and RDF toolset to understand attributes
-- Attribute data is limited to a tree structure (rather than a directed cyclic graph structure)
-- An issuer can not attempt to assert authoritative properties about entities other than the resource owner.
+### Credential Verification
 
-The restrictions are as follows:
+The Credential Verification object within the issuer statement describes how to verify that any credentials presented alongside the issuer statement are valid.
 
-1. Each document represents the resource owner as the base or root node.
-2. The JSON-LD MUST be in compacted form and MUST be specified without any context. The document MUST limit the use of special keywords to "@id", "@type", "@list", "@json", "@language", "@value", and "@direction".  The use of "@direction" is DISCOURAGED due to compatibility with various RDF tools and formats. Use of "@value" is NOT RECOMMENDED except when neccessary to indicate a language and/or direction.
-3. Two attributes MUST NOT contain conflicting properties. Multiple attributes containing the same property on the same node MUST be interpreted as an unordered set of values.
-4. The document MUST NOT attempt to present authoritative information on any entity other than the resource owner. Each node within an attribute (other than the resource owner itself) MUST either be a node reference consisting of an IRI, be an unnamed node, or be a locally named node.
-5. Node references to named nodes MAY be used to divide properties of a node among multiple attributes. Named nodes MUST only be referenced by one property of one node other than the named node itself, which will be its parent node in the document tree. A named node MUST NOT reference itself.
-6. An attribute MAY indicate the "@id" of the resource owner to indicate a unique IRI for the resource owner in the context of the issuer. What information may be dereferenced at this location or what authorization might be required is out of scope of this specification.
+The Credential verification object of an ephemeral public key (as a `jwk` property) which can be leveraged by the issuer to sign credentials.
+
+## Credentials
+
+A multipass is a statement by the issuer of multiple credentials about the subject, which may be selectively disclosed by the holder to a verifier. Selective disclosure allows for presented credentials to be limited to the information requested by a verifier.
+
+The format of a credential is out of scope of this specification, outside of providing the credential validation key (`cdv`) in the issuer statement.
+
+The holder will typically only offer credentials to a relying party which it understands and can properly prompt the user to consent to release. Issuers offer credentials in the formats they supports, containing the attributes they offer. Validators indicate that they require a certain set of attributes, and the credential formats they support those attributes in.
+
+### Credential Format Requirements
+
+A specification which defines a credential format is RECOMMENDED to define:
+
+- The mechanism for an issuer to create a credential, or to determine if it should assert a credential it acquired from another system or party
+- The mechanism for proving the credential is associated with the ticket, such as a signature by the `cdv` key
+- The mechanism for a verifier to validate the credential within a presentation
+- The relationship of the credential with the subject
+- The process for a holder creating a presentation of your credential, including leveraging any features your credential may support such as selective disclosure of data
+- Recommendations on how a holder present your credential within a UX for informed consent
+
+## Multipass Protocol
+
+## Multipass ticket request
+
+Given an appropriate access token, the holder requests a multipass ticket via POST to the multipass ticket endpoint.
+
+The parameters of the request are:
+
+{: vspace="0"}
+jwk
+:     REQUIRED. A JSON Web Key ({{JWK}}) describing the public key of a uniquely generated key pair by the client. A holder MUST NOT reuse this key pair for multiple passes or for other uses. For compatibility, is RECOMMENDED that this key be a point on the P-256 curve.
+
+attribute_contexts
+:     OPTIONAL. A list of one or more contexts supported by the issuer. An issuer MAY limit the attributes returned based on this list, if provided. If omitted, the issuer SHOULD determine appropriate attributes based on the subject and holder.
+
+## Multipass ticket response
+
+The multipass ticket response consists of a JSON {{JSON}} object body with keys representing the issuer statement, holder usage data, and attributes. These values are used by the holder to assemble a multipass presentation.
+
+{: vspace="0"}
+issuer_statement
+:     REQUIRED. A JWT from the issuer to be sent with the presentation, as described in [Issuer Statement](#issuer-statement)
+
+holder_usage
+:     REQUIRED. A JSON object giving any information necessary for proving possession beyond the `cnf` value in the issuer statement.
+
+attribute_contexts
+:     REQUIRED. The contexts which were supplied by the issuer. The format of any supplied attributes are identified by these contexts. An issuer MUST NOT send attributes not represented by a specified context.
+
+attributes:
+:     REQUIRED. A collection of zero or more attributes defined by the supported attribute contexts.
+
+## Multipass Presentation
+
+The multipass presentation is the data model to be leveraged by profiles describing how the verifier interacts with the holder.
+
+## Multipass Presentation Request
+
+A presentation request is represented by an object with several keys:
+
+## Future Considerations
+
+A future system may support multi-use tickets by leveraging a different cryptographic protocol, such as anonymous credentials ({{ANONCRED}}). However, the difference in security is such that this likely should be a separate specification.
+
+This system does not attempt to resolve the ability of the issuer and validator to collude to determine the identity of the subject.  In addition to a `jti` claim in the issuer statement, the issuer could use the uniqueness of the statement itself to correlate a statement to a particular issuance and the corresponding holder and user.
+
+The ticket itself does not have a revocation mechanism, instead leveraging the expiry of the tickets themselves.
