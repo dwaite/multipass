@@ -1,6 +1,6 @@
 ---
-title: MultiPass Ticket Retriaval
-abbrev: MultiPass Retriaval
+title: MultiPass Ticket Retrieval
+abbrev: MultiPass Retrieval
 docname: draft-waite-multipass-retrieval-00
 date: 2020-07-22
 category: exp
@@ -119,7 +119,7 @@ Verifiable Credential systems {{W3C.REC-vc-data-model-20191119}} aim to introduc
 
 This specification describes a container for retrieving a set of credentials from a single issuer, known as a *Multipass Ticket*. These tickets are single use, cryptographically verifiable statements by a particular issuer. For compatibility with existing identity systems, this issuer acts as a protected resource under the OAuth 2.0 Authorization Framework described in ({{OAUTH2}}). There may be other methods for retrieving multipass tickets, which are out of scope of this specification.
 
-This specification also defines mechanisms to prove possession of a key associated with the ticket to the relying party, and one mechanism for verifying credentials were asserted by the issuer.
+This specification also defines mechanisms to prove possession of a key associated with the ticket to the relying party, and for verifying the credentials were asserted by the issuer.
 
 Finally, this specification describes the data expected in a request by a party for credentials, as well as the cryptographic format of the presentation of those credentials back to the requesting party. This specification does not define a profile for requesting or sending multipass tickets to recipients, which may operate in roles such as "Relying Parties" or "Verifiers" within such profiles.
 
@@ -206,7 +206,7 @@ Verifier:
 
 The abstract flow illustrated in {{fig-retrieval-flow}} describes the interaction between the holder, authorization server and issuer to retrieve tickets.
 
-1. The Holder retrieves metadata for the issuer to understand the requirements and capabilities of the Issuer.
+1. The Holder retrieves metadata for the issuer to understand the requirements and capabilities of that issuer.
 
 2. The Metadata Endpoint returns the issuer metadata along with information on the appropriate Authorization Server.
 
@@ -214,13 +214,13 @@ The abstract flow illustrated in {{fig-retrieval-flow}} describes the interactio
 
 4. The Authorization Server returns an access token and optional refresh token to the holder.
 
-5. The Holder requests a multipass ticket from the Multipass Endpoint, leveraging the previously discovered metadata. This request includes an ephemeral public key, which should be unique per request and be different from any cryptographic keys which might be used as part of client authorization to the Authorization or for access token usage.
+5. The Holder requests a multipass ticket from the Multipass Endpoint using the access token, leveraging the previously discovered metadata. This request includes an ephemeral public key, which should be unique per request and be different from any cryptographic keys which might be used as part of client authorization to the Authorization or for access token usage.
 
-6. The issuer returns a generated single-use ticket, with confirmation set to use the supplied ephemeral key.
+6. The issuer returns a generated single-use multipass ticket, bound to the supplied ephemeral key for proof of possession.
 
-Verifiers request credentials be presented to them, claimed by an Issuer with appropriate cryptographic proof. The presentation is constructed by the holder - based on statements from the issuer contained within the multipass ticket and for credentials the issuer asserts.
+Verifiers request credentials be presented to them from a holder, asserted by an issuer with appropriate cryptographic proof. The presentation is constructed by the holder based on statements from the issuer contained within the multipass ticket and from the credentials asserted by the issuer.
 
-The multipass ticket may already have been retrieved and cached for later use (within the validity period of the ticket), or may be retrieved through the process of answering the issuer's request.
+The selected multipass ticket may already have been retrieved and cached for later use (within the validity period of the ticket), or may be retrieved on demand as part of the process of answering the issuer's request.
 
 ~~~~~~~ text/plain
 +--------------+  1. Request presentation     +---------------+
@@ -251,19 +251,20 @@ The multipass ticket may already have been retrieved and cached for later use (w
 {: #fig-usage-flow title="Usage Flow"}
 
 1. The Verifier requests a presentation of credentials, stating its requirements in terms of appropriate issuers, understood credential formats, and/or the attributes desired within those credentials.
+
 2. The Holder interacts with the subject to make sure that the subject understands the information requested. If the user approved disclosure, the holder constructs the presentation of credentials.
 
-3. The Holder returns the constructed presentation to the Verifier
+3. The Holder returns the constructed presentation to the verifier
 
-4. If the verifier does not have appropriate information on the issuer, such as if a cached copy of the metadata has expired or if this issuer is one that the Verifier has not previously interacted with, the Issuer will fetch the metadata from the issuer.
+4. If the verifier does not have appropriate information on the issuer, such as if a cached copy of the metadata has expired or if this issuer is one that the verifier has not previously interacted with, the verifier will fetch the metadata from the issuer.
 
-5. The Issuer Metadata endpoint returns the current metadata
+5. The Issuer's metadata endpoint returns the current metadata
 
-6. Using the presentation and issuer metadata, the verifier will verify the cryptographic message and make a determination of whether policy will allow it to trust the contained credentials.
+6. Using the presentation and issuer metadata, the verifier is then able to verify the cryptographic message and make a determination of whether its policy will allow it to trust the presented credentials.
 
-## Multipass ticket format
+## Multipass Ticket Format
 
-A multipass ticket is single-use cryptographic package used to form a credential presentation to a verifier. It consists of a collection of individually packaged credentials about the resource owner, which may be selectively disclosed to minimally meet the needs of the verifier.
+A multipass ticket is single-use cryptographic package used to form a credential presentation to a verifier from an issuer via a holder. It consists of a collection of individually packaged credentials about the subject, which may be selectively disclosed to minimally meet the needs of the verifier and protect the privacy of the subject.
 
 ~~~~~~~~~~ text/plain
 +------------------------------------------+
@@ -291,7 +292,7 @@ A multipass ticket is single-use cryptographic package used to form a credential
 ### Issuer Statement
 {: #issuer-statement}
 
-The issuer statement is a signed JWT containing information which is both non-identifying and non-correlating of the user, which will be disclosed to all verifiers.
+The Issuer Statement is a signed JWT containing information which is both non-identifying and non-correlating of the user, which will be disclosed to all verifiers.
 
 The JWT contains the following keys, defined by ({{JWT}}) and ({{JWTPOP}})
 
@@ -306,7 +307,7 @@ exp
 :    REQUIRED. The expiration time after which the multipass MUST NOT be presented to a verifier and MUST NOT be accepted by a verifier for processing.  A holder MAY use expiry to proactively acquire one or more new multipasses. The expiration SHOULD take into account the validity period of associated credentials. It is RECOMMENDED that expiry times have low precision or other mechanisms to prevent statistical correlation of multiple passes retrieved by the holder simultaneously.
 
 jti
-:    OPTIONAL. A unique identifier for the JWT. MAY be used for communicating out-of-band from a verifier to an issuer about this multipass and the associated resource owner.
+:    OPTIONAL. A unique identifier for the JWT. It MAY be used for communicating out-of-band from a verifier to an issuer about this multipass and the associated subject (such as in the case of abuse). It MUST NOT contain any information about the subject that could be used to correlate multiple tickets.
 
 cnf
 :    REQUIRED. Used to provide proof-of-possession of the holder to the verifier. It is RECOMMENDED that this be a public key in the form of a point on the P-256 curve.
@@ -322,15 +323,15 @@ As a specific example, this information MUST NOT indicate the subject belong to 
 
 The Credential Verification object within the issuer statement describes how to verify that any credentials presented alongside the issuer statement are valid.
 
-The Credential verification object of an ephemeral public key (as a `jwk` property) which can be leveraged by the issuer to sign credentials.
+The Credential verification object is an ephemeral public key (as a `jwk` property) which can be leveraged by the issuer to sign individual credential statements.
 
 ## Credentials
 
-A multipass is a statement by the issuer of multiple credentials about the subject, which may be selectively disclosed by the holder to a verifier. Selective disclosure allows for presented credentials to be limited to the information requested by a verifier.
+A multipass ticket is an assertion by the issuer of multiple credential statements about the subject, which may be selectively disclosed by the holder to a verifier. Selective disclosure allows for presented credentials to be limited to only the information requested by a verifier.
 
-The format of a credential is out of scope of this specification, outside of providing the credential validation key (`cdv`) in the issuer statement.
+The format of a credential statement is out of scope of this specification, outside of providing the credential validation key (`cdv`) in the issued ticket.
 
-The holder will typically only offer credentials to a relying party which it understands and can properly prompt the user to consent to release. Issuers offer credentials in the formats they supports, containing the attributes they offer. Validators indicate that they require a certain set of attributes, and the credential formats they support those attributes in.
+The holder will typically only offer credentials to a relying party which it understands and can properly prompt the user to consent to release. Issuers offer credentials in the formats they support, containing the attributes they can assert about the subject. Validators indicate that they require a certain set of attributes along with the credential formats they support those attributes in.
 
 ### Credential Format Requirements
 
@@ -340,12 +341,12 @@ A specification which defines a credential format is RECOMMENDED to define:
 - The mechanism for proving the credential is associated with the ticket, such as a signature by the `cdv` key
 - The mechanism for a verifier to validate the credential within a presentation
 - The relationship of the credential with the subject
-- The process for a holder creating a presentation of your credential, including leveraging any features your credential may support such as selective disclosure of data
-- Recommendations on how a holder present your credential within a UX for informed consent
+- The process for a holder creating a presentation of the credential, including leveraging any features the credential may support such as selective disclosure of data
+- Recommendations on how a holder should present the credential within a UX for informed consent
 
 ## Multipass Protocol
 
-## Multipass ticket request
+## Multipass Ticket Request
 
 Given an appropriate access token, the holder requests a multipass ticket via POST to the multipass ticket endpoint.
 
@@ -358,9 +359,9 @@ jwk
 attribute_contexts
 :     OPTIONAL. A list of one or more contexts supported by the issuer. An issuer MAY limit the attributes returned based on this list, if provided. If omitted, the issuer SHOULD determine appropriate attributes based on the subject and holder.
 
-## Multipass ticket response
+## Multipass Ticket Response
 
-The multipass ticket response consists of a JSON {{JSON}} object body with keys representing the issuer statement, holder usage data, and attributes. These values are used by the holder to assemble a multipass presentation.
+The Multipass Ticket Response consists of a JSON {{JSON}} object body with keys representing the issuer statement, holder usage data, and attributes. These values are used by the holder to assemble a multipass presentation.
 
 {: vspace="0"}
 issuer_statement
@@ -377,16 +378,16 @@ attributes:
 
 ## Multipass Presentation
 
-The multipass presentation is the data model to be leveraged by profiles describing how the verifier interacts with the holder.
+The Multipass Presentation is the data model to be leveraged by profiles describing how the verifier interacts with the holder.
 
 ## Multipass Presentation Request
 
-A presentation request is represented by an object with several keys:
+A Presentation Request is represented by an object with several keys: TBD
 
 ## Future Considerations
 
-A future system may support multi-use tickets by leveraging a different cryptographic protocol, such as anonymous credentials ({{ANONCRED}}). However, the difference in security is such that this likely should be a separate specification.
+A future system may support multi-use tickets by leveraging a different cryptographic protocol, such as anonymous credentials ({{ANONCRED}}). However, the difference in security is such that this likely will be a separate specification.
 
-This system does not attempt to resolve the ability of the issuer and validator to collude to determine the identity of the subject.  In addition to a `jti` claim in the issuer statement, the issuer could use the uniqueness of the statement itself to correlate a statement to a particular issuance and the corresponding holder and user.
+This system does not attempt to resolve the ability of the issuer and validator to collude to determine the identity of the subject.  In addition to a `jti` claim in the issuer statements, the issuer could use the uniqueness of the statements themselves to correlate any statement to a particular issuance and the corresponding holder and subject.
 
-The ticket itself does not have a revocation mechanism, instead leveraging the expiry of the tickets themselves.
+The ticket itself does not have a revocation mechanism, instead leveraging the expiry of the tickets themselves. Accordingly, tickets should have short expirations that properly accomodate potential offline or disconnected use cases.
