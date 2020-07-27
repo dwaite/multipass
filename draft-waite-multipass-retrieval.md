@@ -1,6 +1,6 @@
 ---
-title: MultiPass Ticket Retriaval
-abbrev: MultiPass Retriaval
+title: MultiPass Ticket Retrieval
+abbrev: MultiPass Retrieval
 docname: draft-waite-multipass-retrieval-00
 date: 2020-07-22
 category: exp
