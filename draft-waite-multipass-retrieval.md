@@ -181,37 +181,85 @@ Verifier:
 ## Protocol Flow
 
 ~~~~~~~~~~ text/plain
-     +--------+                               +---------------+
-     |        |<-(1a)- OAuth grant request -->| Authorization |
-     |        |                               |     Server    |
-     |        |<-(1b)- Access Token ----------|               |
-     |        |                               +---------------+
-     |        |
-     |        |                               +---------------+
-     |        |--(2)- Request ticket -------->|               |
-     | Holder |                               |     Issuer    |
-     |        |<-(3)- Multipass ticket -------|               |
-     |        |                               +---------------+
-    / /      / /
-     |        |                               +---------------+
-     |        |<-(4)- Presentation request ---|               |
-     |        |                               |    Verifier   |
-     |        |--(5)- Presentation response ->|               |
-     +--------+                               +---------------+
++--------------+  1. Discover Metadata        +---------------+
+|              |  ------------------------>   |               |
+|              |                              |Issuer Metadata|
+|              |  2. Return Metadata          |   Endpoint    |
+|              |  <------------------------   |               |
+|              |                              +---------------+
+|              |                                               
+|              |  3. Authorize Holder         +---------------+
+|              |  ------------------------>   |               |
+|    Holder    |                              | Authorization |
+|              |  4. Return OAuth tokens      |    Server     |
+|              |  <------------------------   |               |
+|              |                              +---------------+
+|              |                                               
+|              |  5. Request multipass        +---------------+
+|              |  ------------------------>   |               |
+|              |                              |   Multipass   |
+|              |  6. Return generated ticket  |   Endpoint    |
+|              |  <------------------------   |               |
++--------------+                              +---------------+
 ~~~~~~~~~~
-{: #fig-protocol-flow title="Abstract Protocol Flow"}
+{: #fig-retrieval-flow title="Retrieval Flow"}
 
-The abstract flow illustrated in {{fig-protocol-flow}} describes the interaction between the holder, authorization server and issuer to retrieve tickets, as well as the interaction between the holder and verifier to present credentials. In more detail:
+The abstract flow illustrated in {{fig-retrieval-flow}} describes the interaction between the holder, authorization server and issuer to retrieve tickets.
 
-1. The Holder seeks authorization from the Authorization Server as described in ({{OAUTH2}}), by specifying a scope of `multipass`.
+1. The Holder retrieves metadata for the issuer to understand the requirements and capabilities of the Issuer.
 
-2. The Holder requests a multipass ticket using the acquired access token. This request includes an ephemeral public key, which should be unique per request and be different from any cryptographic keys used by sender constrained token mechanisms (such as DPoP).
+2. The Metadata Endpoint returns the issuer metadata along with information on the appropriate Authorization Server.
 
-3. The holder returns a single-use multipass ticket, with confirmation set to use the supplied ephemeral key.
+3. The Holder requests authorization from the Authorization Server as described in ({{OAUTH2}}), by specifying a scope of `multipass`.
 
-4. Seperately, a verifier requests a presentation with requirements that which match the multipass ticket previously issued and some subset of associated credentials. If a valid ticket is not available at the holder (such as exhaustion of any ticket cache), steps 2 and 3 may be repeated to fetch a new multipass ticket.
+4. The Authorization Server returns an access token and optional refresh token to the holder.
 
-5. After the holder confirms the user wishes to share the information requested with the verifier, the presentation response is returned based on the multipass ticket.
+5. The Holder requests a multipass ticket from the Multipass Endpoint, leveraging the previously discovered metadata. This request includes an ephemeral public key, which should be unique per request and be different from any cryptographic keys which might be used as part of client authorization to the Authorization or for access token usage.
+
+6. The issuer returns a generated single-use ticket, with confirmation set to use the supplied ephemeral key.
+
+Verifiers request credentials be presented to them, claimed by an Issuer with appropriate cryptographic proof. The presentation is constructed by the holder - based on statements from the issuer contained within the multipass ticket and for credentials the issuer asserts.
+
+The multipass ticket may already have been retrieved and cached for later use (within the validity period of the ticket), or may be retrieved through the process of answering the issuer's request.
+
+~~~~~~~ text/plain
++--------------+  1. Request presentation     +---------------+
+|              |  ------------------------>   |               |
+|              |                     +-----   |               |
+|              |  2. Gather consent  |        |               |
+|              |  and construct      |        |               |
+|              |  presentation       |        |    Holder     |
+|              |                     +---->   |               |
+|              |                              |               |
+|              |  3. Return presentation      |               |
+|              |  <------------------------   |               |
+|              |                              +---------------+
+|   Verifier   |                                               
+|              |                                               
+|              |  4. Discover Metadata        +---------------+
+|              |  ------------------------>   |               |
+|              |                              |Issuer Metadata|
+|              |  5. Return Metadata          |   Endpoint    |
+|              |  <------------------------   |               |
+|              |                              +---------------+
+|              |  -----+                                       
+|              |       |  6. Verify presentation               
+|              |       |  and credentials                      
+|              |  <----+                                       
++--------------+                                               
+~~~~~~~
+{: #fig-usage-flow title="Usage Flow"}
+
+1. The Verifier requests a presentation of credentials, stating its requirements in terms of appropriate issuers, understood credential formats, and/or the attributes desired within those credentials.
+2. The Holder interacts with the subject to make sure that the subject understands the information requested. If the user approved disclosure, the holder constructs the presentation of credentials.
+
+3. The Holder returns the constructed presentation to the Verifier
+
+4. If the verifier does not have appropriate information on the issuer, such as if a cached copy of the metadata has expired or if this issuer is one that the Verifier has not previously interacted with, the Issuer will fetch the metadata from the issuer.
+
+5. The Issuer Metadata endpoint returns the current metadata
+
+6. Using the presentation and issuer metadata, the verifier will verify the cryptographic message and make a determination of whether policy will allow it to trust the contained credentials.
 
 ## Multipass ticket format
 
