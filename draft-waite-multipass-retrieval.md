@@ -119,7 +119,7 @@ Verifiable Credential systems {{W3C.REC-vc-data-model-20191119}} aim to introduc
 
 This specification describes a container for retrieving a set of credentials from a single issuer, known as a *Multipass Ticket*. These tickets are single use, cryptographically verifiable statements by a particular issuer. For compatibility with existing identity systems, this issuer acts as a protected resource under the OAuth 2.0 Authorization Framework described in ({{OAUTH2}}). There may be other methods for retrieving multipass tickets, which are out of scope of this specification.
 
-This specification also defines mechanisms to prove possession of a key associated with the ticket to the relying party, and one mechanism for verifying credentials were asserted by the issuer.
+This specification also defines mechanisms to prove possession of a key associated with the ticket to the relying party, and for verifying the credentials were asserted by the issuer.
 
 Finally, this specification describes the data expected in a request by a party for credentials, as well as the cryptographic format of the presentation of those credentials back to the requesting party. This specification does not define a profile for requesting or sending multipass tickets to recipients, which may operate in roles such as "Relying Parties" or "Verifiers" within such profiles.
 
@@ -206,7 +206,7 @@ Verifier:
 
 The abstract flow illustrated in {{fig-retrieval-flow}} describes the interaction between the holder, authorization server and issuer to retrieve tickets.
 
-1. The Holder retrieves metadata for the issuer to understand the requirements and capabilities of the Issuer.
+1. The Holder retrieves metadata for the issuer to understand the requirements and capabilities of that issuer.
 
 2. The Metadata Endpoint returns the issuer metadata along with information on the appropriate Authorization Server.
 
@@ -214,13 +214,13 @@ The abstract flow illustrated in {{fig-retrieval-flow}} describes the interactio
 
 4. The Authorization Server returns an access token and optional refresh token to the holder.
 
-5. The Holder requests a multipass ticket from the Multipass Endpoint, leveraging the previously discovered metadata. This request includes an ephemeral public key, which should be unique per request and be different from any cryptographic keys which might be used as part of client authorization to the Authorization or for access token usage.
+5. The Holder requests a multipass ticket from the Multipass Endpoint using the access token, leveraging the previously discovered metadata. This request includes an ephemeral public key, which should be unique per request and be different from any cryptographic keys which might be used as part of client authorization to the Authorization or for access token usage.
 
-6. The issuer returns a generated single-use ticket, with confirmation set to use the supplied ephemeral key.
+6. The issuer returns a generated single-use multipass ticket, bound to the supplied ephemeral key for proof of possession.
 
-Verifiers request credentials be presented to them, claimed by an Issuer with appropriate cryptographic proof. The presentation is constructed by the holder - based on statements from the issuer contained within the multipass ticket and for credentials the issuer asserts.
+Verifiers request credentials be presented to them from a holder, asserted by an issuer with appropriate cryptographic proof. The presentation is constructed by the holder based on statements from the issuer contained within the multipass ticket and from the credentials asserted by the issuer.
 
-The multipass ticket may already have been retrieved and cached for later use (within the validity period of the ticket), or may be retrieved through the process of answering the issuer's request.
+The selected multipass ticket may already have been retrieved and cached for later use (within the validity period of the ticket), or may be retrieved on demand as part of the process of answering the issuer's request.
 
 ~~~~~~~ text/plain
 +--------------+  1. Request presentation     +---------------+
@@ -251,19 +251,20 @@ The multipass ticket may already have been retrieved and cached for later use (w
 {: #fig-usage-flow title="Usage Flow"}
 
 1. The Verifier requests a presentation of credentials, stating its requirements in terms of appropriate issuers, understood credential formats, and/or the attributes desired within those credentials.
+
 2. The Holder interacts with the subject to make sure that the subject understands the information requested. If the user approved disclosure, the holder constructs the presentation of credentials.
 
-3. The Holder returns the constructed presentation to the Verifier
+3. The Holder returns the constructed presentation to the verifier
 
-4. If the verifier does not have appropriate information on the issuer, such as if a cached copy of the metadata has expired or if this issuer is one that the Verifier has not previously interacted with, the Issuer will fetch the metadata from the issuer.
+4. If the verifier does not have appropriate information on the issuer, such as if a cached copy of the metadata has expired or if this issuer is one that the verifier has not previously interacted with, the verifier will fetch the metadata from the issuer.
 
-5. The Issuer Metadata endpoint returns the current metadata
+5. The Issuer's metadata endpoint returns the current metadata
 
-6. Using the presentation and issuer metadata, the verifier will verify the cryptographic message and make a determination of whether policy will allow it to trust the contained credentials.
+6. Using the presentation and issuer metadata, the verifier is then able to verify the cryptographic message and make a determination of whether its policy will allow it to trust the presented credentials.
 
-## Multipass ticket format
+## Multipass Ticket Format
 
-A multipass ticket is single-use cryptographic package used to form a credential presentation to a verifier. It consists of a collection of individually packaged credentials about the resource owner, which may be selectively disclosed to minimally meet the needs of the verifier.
+A multipass ticket is single-use cryptographic package used to form a credential presentation to a verifier from an issuer via a holder. It consists of a collection of individually packaged credentials about the subject, which may be selectively disclosed to minimally meet the needs of the verifier and protect the privacy of the subject.
 
 ~~~~~~~~~~ text/plain
 +------------------------------------------+
