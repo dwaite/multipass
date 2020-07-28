@@ -307,17 +307,11 @@ Issuer statements MAY provide additional information. This additional informatio
 
 As a specific example, this information MUST NOT indicate the subject belong to a subset at a particular issuer who have access to a particular credential, such as by including an additional mechanism to verify that credential format. The `cdv` property is provided specifically so that that verification information can be included separately from the issuer statement, as part of the credential itself. The issuer statement MAY include such information if it does not distinguish the subject as belonging to a subset, but a requirement to do so might serve as a limitation of that credential format in other environments.
 
-### Credential Verification
-
-The Credential Verification object within the issuer statement describes how to verify that any credentials presented alongside the issuer statement are valid.
-
-The Credential verification object is an ephemeral public key (as a `jwk` property) which can be leveraged by the issuer to sign individual credentials.
-
 ## Credentials
 
 A multipass ticket is an assertion by the issuer of one or more credentials about the subject, which may be selectively disclosed by the holder to a verifier. Selective disclosure allows for presented credentials to be limited to only the information requested by a verifier. In addition to selecting which credentials are disclosed, some credential formats MAY also allow portions of the credential to be selectively disclosed.
 
-The format of a credential data is out of scope of this specification, outside of providing the credential validation key (`cdv`) in the issued ticket. The credential data MAY contain information only meant for the holder in order to properly present the credential to the issuer, and MAY define a verification method other than the `cdv` public key.
+The format of a credential data is out of scope of this specification, outside of providing the credential validation object (`cdv`) in the issued ticket. The credential validation object contains an ephemeral public key (as a `jwk` property) which is leveraged by some credential formats to verify that credential data is asserted by the issuer. The credential data MAY contain information only meant for the holder in order to properly present the credential to the issuer, and MAY define a verification method other than the `cdv` public key.
 
 The holder will typically only offer credentials to a relying party which it understands and can properly prompt the user to consent to release. Issuers offer credentials in the formats they support, containing the attributes they can assert about the subject. Validators indicate that they require a certain set of attributes along with the credential formats they support to receive them.
 
@@ -325,12 +319,19 @@ The holder will typically only offer credentials to a relying party which it und
 
 A specification which defines a credential format is RECOMMENDED to define:
 
-- The mechanism for an issuer to create a credential, or to determine if it should assert a credential it acquired from another system or party
-- The mechanism for proving the credential is associated with the ticket, such as a signature by the `cdv` key
-- The mechanism for a verifier to validate the credential within a presentation
-- The relationship of the credential with the subject
-- The process for a holder creating a presentation of the credential, including leveraging any features the credential may support such as selective disclosure of data
-- Recommendations on how a holder should present the credential within a UX for informed consent
+1. The mechanism for an issuer to create a credential, or how to determine if it should assert a credential from another system or party
+2. The mechanism for verifying the credential is associated with a presentation, such as a signature by the `cdv` key
+3. The relationship of the credential with the subject
+4. The process for a holder creating a presentation of the credential, including leveraging any features the credential may support such as selective disclosure of data
+5. Recommendations on how a holder should present the credential within a UX for informed consent
+
+A credential format MAY impact all stages of the multipass protocol described below, including:
+
+1. Declare metadata on how it is meant to be used, such as supported cryptographic properties or potentially available attributes about subjects.
+2. Support or require information on the multipass request from the holder to the issuer.
+3. Provide information in the multipass ticket, such as credential data to include in a presentation or information the holder needs to properly present the credential.
+4. Define parameters in a presentation request, such as the list of required attributes for service. Such a list could affect the UX of the holder, allow for selective disclosure, or result in a presentation request being rejected as being unable to be met.
+5. Define the mechanism to present the credential to the verifier.
 
 ## Multipass Protocol
 
