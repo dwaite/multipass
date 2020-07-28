@@ -112,7 +112,10 @@ informative:
 ---
 abstract
 
-blah blah
+NOTE: this document was originally an attempt to restrict JSON-LD to a sufficient subset to be usable for a wide variety of credentials, including by parsers which did not have JSON-LD capabilities, and to allow for selective disclosure. As the multipass ticket expanded to have different *formats* of credentials, the need for this went away.
+
+As such, this is a text holding area until work begins defining an example credential format.
+
 ---
 middle
 
