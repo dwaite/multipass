@@ -2,7 +2,7 @@
 title: Multipass Ticket Retrieval
 abbrev: Multipass Retrieval
 docname: draft-waite-multipass-retrieval-00
-date: 2020-07-22
+date: 2020-07-27
 category: exp
 
 ipr: trust200902
@@ -20,13 +20,30 @@ author:
     email: david@alkaline-solutions.com
 
 normative:
-  # URI:        RFC3986
+  SECURITY:  RFC4949 # Internet Security Glossary
   OAUTH2:     RFC6749
   JSON:       RFC7159
   JWK:        RFC7517
-  # JWA:        RFC7518
   JWT:        RFC7519
+  OAUTHMETA:  RFC8414 # OAuth Server Metadata
+  # JWA:        RFC7518
   # I-D.ietf-oauth-security-topics:
+
+informative:
+  # OAUTHREG:       RFC7591 # OAuth Dynamic Client Registration
+  # OAUTHPKCE:      RFC7636 # OAUTH PKCE
+  # APPAUTH:        RFC8252 # OAuth for Native Apps
+  # OAUTHMTLS:      RFC8705 # OAuth MTLS client authentication/binding
+  JWTPOP:         RFC7800 # PoP Key Semantics for JWTs
+  # OAUTHRESOURCE:  RFC8707 # Resource Indicators
+  OASIS.saml-core-2.0-os:
+  # USASCII:                # 7 bit ASCII
+  #   title: "Coded Character Set -- 7-bit American Standard Code for Information Interchange, ANSI X3.4"
+  #   author:
+  #     name: "American National Standards Institute"
+  #   date: 1986
+  # W3C.REC-html401-19991224: # HTML 4.01
+  # W3C.REC-xml-20081126: # XML 1.0 5th Ed
   W3C.REC-vc-data-model-20191119: # VC Data Model
     target: https://www.w3.org/TR/2019/REC-vc-data-model-20191119/
     title: Verifiable Credentials Data Model 1.0
@@ -37,33 +54,6 @@ normative:
       - ins: D. Burnett
       - ins: B. Zundel
     date: November 19 2019
-
-informative:
-  # HTTPTLS:        RFC2818 # HTTP over TLS
-  # UTF8:           RFC3629 # UTF8
-  SECURITY:  RFC4949 # Internet Security Glossary
-  # COOKIES:        RFC6265 # HTTP State Management
-  # OAUTHTHREAT:    RFC6819 # OAuth 2.0 Threat Model and Security Considerations
-  # HTTPSYNTAX:     RFC7230 # HTTP 1.1: Syntax and Routing
-  # HTTPSEMANTICS:  RFC7231 # HTTP 1.1 Semantics and Content
-  # HTTPCACHING:    RFC7234 # HTTP 1.1 Caching
-  # HTTPAUTH:       RFC7235 # HTTP 1.1: Authentication
-  # OAUTHREG:       RFC7591 # OAuth Dynamic Client Registration
-  # OAUTHPKCE:      RFC7636 # OAUTH PKCE
-  JWTPOP:         RFC7800 # PoP Key Semantics for JWTs
-  # APPAUTH:        RFC8252 # OAuth for Native Apps
-  OAUTHMETA:      RFC8414 # OAuth Server Metadata
-  # TLS13:          RFC8446
-  # OAUTHMTLS:      RFC8705 # OAuth MTLS client authentication/binding
-  # OAUTHRESOURCE:  RFC8707 # Resource Indicators
-  OASIS.saml-core-2.0-os:
-  # USASCII:                # 7 bit ASCII
-  #   title: "Coded Character Set -- 7-bit American Standard Code for Information Interchange, ANSI X3.4"
-  #   author:
-  #     name: "American National Standards Institute"
-  #   date: 1986
-  # W3C.REC-html401-19991224: # HTML 4.01
-  # W3C.REC-xml-20081126: # XML 1.0 5th Ed
   OpenID.Core: # Openid Connect Core 1.0
     title: "OpenID Connect Core 1.0"
     target: https://openiD.net/specs/openiD-connect-core-1_0.html
@@ -96,7 +86,6 @@ informative:
       - ins: J. Camenisch
       - ins: A. Lysyanskaya
     date: 2001
-  
 
 ---
 abstract
