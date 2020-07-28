@@ -1,6 +1,6 @@
 ---
-title: MultiPass Ticket Retrieval
-abbrev: MultiPass Retrieval
+title: Multipass Ticket Retrieval
+abbrev: Multipass Retrieval
 docname: draft-waite-multipass-retrieval-00
 date: 2020-07-22
 category: exp
@@ -346,43 +346,58 @@ A specification which defines a credential format is RECOMMENDED to define:
 
 ## Multipass Protocol
 
-## Multipass Ticket Request
+### Multipass Metadata Endpoint
+
+The Multipass Metadata Endpoint builds upon the OAuth Authorization Server Metadata format ({{OAUTHMETA}}.) When using the OAuth Application Server metadata, the OAuth issuer and Multipass issuer have the same URI name.
+
+It is RECOMMENDED that metadata be retrieved using the process detailed in Section 3 of {{OAUTHMETA}}, first attempting to resolve the URL suffix "oauth-authorization-server", then attempting to resolve the URL suffix "openid-configuration" using the same process. {{OpenID.Core}} describes a different, non-standard location for "openid-configuration" metadata when the issuer URL contains a path - Issuers SHOULD NOT assume that Holders or Verifiers will attempt to resolve this location, and SHOULD either move or duplicate their metadata to the location specified by {{OAUTHMETA}}.
+
+### Multipass Metadata Values
+
+Multipass Metadata values are grouped under a property with the `multipass` metadata name.
+
+credentials_supported:
+:  REQUIRED. An object with keys indicating the credential formats available. The value associated with this key MUST either be defined by teh credential format, or be `true` to indicate support.
+jwks_uri:
+:  REQUIRED. The URI of the JWKS endpoint for the multipass issuer. The multipass issuer has a separate JWKS endpoint from the authorization server to support differing keys, rotated on a different schedule.
+retrieval_endpoint:
+:  REQUIRED. The `https` scheme URL of the multipass endpoint.
+holder_cnf_alg_values_supported:
+:  OPTIONAL. JSON array containing a list of the JWS signing algorithms which can be embedded into a multipass ticket for subject confirmation. Omitting this value is equivilant to specifying a single algorithm of `ES256` (ECDSA using P-256 and SHA-256). It is RECOMMENDED that `ES256` be supported for compatibility.
+
+### Multipass Ticket Request
 
 Given an appropriate access token, the holder requests a multipass ticket via POST to the multipass ticket endpoint.
 
 The parameters of the request are:
 
 {: vspace="0"}
-jwk
+holder_jwk
 :     REQUIRED. A JSON Web Key ({{JWK}}) describing the public key of a uniquely generated key pair by the client. A holder MUST NOT reuse this key pair for multiple passes or for other uses. For compatibility, is RECOMMENDED that this key be a point on the P-256 curve.
 
-attribute_contexts
-:     OPTIONAL. A list of one or more contexts supported by the issuer. An issuer MAY limit the attributes returned based on this list, if provided. If omitted, the issuer SHOULD determine appropriate attributes based on the subject and holder.
+credentials_requested
+:     OPTIONAL. A dictionary of credential formats. The value of this dictionary is defined by the credential format, but MAY support `true` as a default configuration and MUST use `true` if no configuration is defined for a given credential format. An issuer takes this as advice, and MAY return more credentials than requested or omit requested credential formats.
 
-## Multipass Ticket Response
+### Multipass Ticket Response
 
-The Multipass Ticket Response consists of a JSON {{JSON}} object body with keys representing the issuer statement, holder usage data, and attributes. These values are used by the holder to assemble a multipass presentation.
+The multipass ticket response consists of a JSON {{JSON}} object body with keys representing the issuer statement and credentials. These values are used by the holder to assemble a multipass presentation.
 
 {: vspace="0"}
 issuer_statement
 :     REQUIRED. A JWT from the issuer to be sent with the presentation, as described in [Issuer Statement](#issuer-statement)
 
-holder_usage
-:     REQUIRED. A JSON object giving any information necessary for proving possession beyond the `cnf` value in the issuer statement.
-
-attribute_contexts
-:     REQUIRED. The contexts which were supplied by the issuer. The format of any supplied attributes are identified by these contexts. An issuer MUST NOT send attributes not represented by a specified context.
-
-attributes:
-:     REQUIRED. A collection of zero or more attributes defined by the supported attribute contexts.
+credentials
+:     REQUIRED. A dictionary of credentials, with keys indicating credential formats. The credential format describes both the structure of the credential and how to present it. For example, the value of a credential format may be a string holding a compact JWS message, signed using the key described by the `cdv` claim.
 
 ## Multipass Presentation
 
 The Multipass Presentation is the data model to be leveraged by profiles describing how the verifier interacts with the holder.
 
-## Multipass Presentation Request
+### Presentation Request
 
 A Presentation Request is represented by an object with several keys: TBD
+
+### Presentation Request
 
 ## Future Considerations
 
