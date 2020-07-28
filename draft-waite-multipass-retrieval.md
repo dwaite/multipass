@@ -92,7 +92,7 @@ abstract
 
 User authentication and attributes are exchanged online today between organizations based on bilateral business arrangements, with user consent and privacy provided as desired by the organization(s) involved.
 
-MultiPass is a system intended for an organization to issue credentials unilaterally, where other organizations can evaluate credentials without having a relationship to the issuing party. This is accomplished by leveraging a software agent, which allows this exchange to be done in a manner which can respect user privacy and support informed decisions around disclosure.
+Multipass is a system intended for an organization to issue credentials unilaterally, where other organizations can evaluate credentials without having a relationship to the issuing party. This is accomplished by leveraging a software agent, which allows this exchange to be done in a manner that is able to respect user privacy and support informed decisions around disclosure.
 
 This specification provides a mechanism to retrieve single-use tickets, which bundle cryptographically secure credentials in a non-correlatable, selectively disclosable manner.
 
@@ -119,8 +119,7 @@ Finally, this specification describes the data expected in a request by a party 
 Certain security-related terms are to be understood in the sense defined in {{SECURITY}}.  These terms include, but are not limited to,
 "air gap", "anonymity", "assymmetric cryptography", "attribute", "authentication", "authorization", "certificate", "challenge-response", "credential", "data integrity", "domain", "domain name", "enclave", "encryption", "ephemeral key", "expire", "fresh", "identifier", "identity", "identity proofing", "integrity", "privacy", "private key", "proof-of-possession", "protocol", "public key", "repudiation", "sign", "signature", "single sign-on", "steganography", "trust", "validate", "validity period", "verify", and "zero-knowledge proof"
 
-Unless otherwise noted, all the protocol parameter names and values
-are case sensitive.
+Unless otherwise noted, all the protocol parameter names and values are case sensitive.
 
 This specification also defines or revises the following terms:
 
@@ -203,13 +202,13 @@ The abstract flow illustrated in {{fig-retrieval-flow}} describes the interactio
 
 4. The Authorization Server returns an access token and optional refresh token to the holder.
 
-5. The Holder requests a multipass ticket from the Multipass Endpoint using the access token, leveraging the previously discovered metadata. This request includes an ephemeral public key, which should be unique per request and be different from any cryptographic keys which might be used as part of client authorization to the Authorization or for access token usage.
+5. The Holder requests a multipass ticket from the Multipass Endpoint using the access token, leveraging the previously discovered metadata. This request includes an ephemeral public key, which should be unique per request and be different from any cryptographic keys which might be used as part of client authorization to the Authorization Server or for access token usage.
 
 6. The issuer returns a generated single-use multipass ticket, bound to the supplied ephemeral key for proof of possession.
 
-Verifiers request credentials be presented to them from a holder, asserted by an issuer with appropriate cryptographic proof. The presentation is constructed by the holder based on statements from the issuer contained within the multipass ticket and from the credentials asserted by the issuer.
+Verifiers request credentials be presented to them from a holder and asserted by an issuer with appropriate cryptographic proof. The presentation is constructed by the holder based on statements from the issuer contained within the multipass ticket and from the credentials asserted by the issuer.
 
-The selected multipass ticket may already have been retrieved and cached for later use (within the validity period of the ticket), or may be retrieved on demand as part of the process of answering the issuer's request.
+The selected multipass ticket may already have been retrieved and cached for later use (within the validity period of the ticket), or may be retrieved on demand as part of the process of answering the validator's request.
 
 ~~~~~~~ text/plain
 +--------------+  1. Request presentation     +---------------+
@@ -243,11 +242,11 @@ The selected multipass ticket may already have been retrieved and cached for lat
 
 2. The Holder interacts with the subject to make sure that the subject understands the information requested. If the user approved disclosure, the holder constructs the presentation of credentials.
 
-3. The Holder returns the constructed presentation to the verifier
+3. The Holder returns the constructed presentation to the verifier.
 
 4. If the verifier does not have appropriate information on the issuer, such as if a cached copy of the metadata has expired or if this issuer is one that the verifier has not previously interacted with, the verifier will fetch the metadata from the issuer.
 
-5. The Issuer's metadata endpoint returns the current metadata
+5. The Issuer's metadata endpoint returns the current metadata.
 
 6. Using the presentation and issuer metadata, the verifier is then able to verify the cryptographic message and make a determination of whether its policy will allow it to trust the presented credentials.
 
@@ -316,11 +315,11 @@ The Credential verification object is an ephemeral public key (as a `jwk` proper
 
 ## Credentials
 
-A multipass ticket is an assertion by the issuer of multiple credential statements about the subject, which may be selectively disclosed by the holder to a verifier. Selective disclosure allows for presented credentials to be limited to only the information requested by a verifier.
+A multipass ticket is an assertion by the issuer of one or more credential statements about the subject, which may be selectively disclosed by the holder to a verifier. Selective disclosure allows for presented credentials to be limited to only the information requested by a verifier.
 
 The format of a credential statement is out of scope of this specification, outside of providing the credential validation key (`cdv`) in the issued ticket.
 
-The holder will typically only offer credentials to a relying party which it understands and can properly prompt the user to consent to release. Issuers offer credentials in the formats they support, containing the attributes they can assert about the subject. Validators indicate that they require a certain set of attributes along with the credential formats they support those attributes in.
+The holder will typically only offer credentials to a relying party which it understands and can properly prompt the user to consent to release. Issuers offer credentials in the formats they support, containing the attributes they can assert about the subject. Validators indicate that they require a certain set of attributes along with the credential formats they support to receive them.
 
 ### Credential Format Requirements
 
