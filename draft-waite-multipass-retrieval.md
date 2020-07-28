@@ -20,7 +20,7 @@ author:
     email: david@alkaline-solutions.com
 
 normative:
-  SECURITY:  RFC4949 # Internet Security Glossary
+  SECURITY:   RFC4949 # Internet Security Glossary
   OAUTH2:     RFC6749
   JSON:       RFC7159
   JWK:        RFC7517
@@ -267,7 +267,7 @@ A multipass ticket is single-use cryptographic package used to form a credential
 |                                          |
 | +----------------------------------+     |
 | |                                  +-+   |
-| |        Credential Statements     | +-+ |
+| |           Credential Data        | +-+ |
 | |                                  | | | |
 | +-+--------------------------------+ | | |
 |   +-+--------------------------------+ | |
@@ -311,13 +311,13 @@ As a specific example, this information MUST NOT indicate the subject belong to 
 
 The Credential Verification object within the issuer statement describes how to verify that any credentials presented alongside the issuer statement are valid.
 
-The Credential verification object is an ephemeral public key (as a `jwk` property) which can be leveraged by the issuer to sign individual credential statements.
+The Credential verification object is an ephemeral public key (as a `jwk` property) which can be leveraged by the issuer to sign individual credentials.
 
 ## Credentials
 
-A multipass ticket is an assertion by the issuer of one or more credential statements about the subject, which may be selectively disclosed by the holder to a verifier. Selective disclosure allows for presented credentials to be limited to only the information requested by a verifier.
+A multipass ticket is an assertion by the issuer of one or more credentials about the subject, which may be selectively disclosed by the holder to a verifier. Selective disclosure allows for presented credentials to be limited to only the information requested by a verifier. In addition to selecting which credentials are disclosed, some credential formats MAY also allow portions of the credential to be selectively disclosed.
 
-The format of a credential statement is out of scope of this specification, outside of providing the credential validation key (`cdv`) in the issued ticket.
+The format of a credential data is out of scope of this specification, outside of providing the credential validation key (`cdv`) in the issued ticket. The credential data MAY contain information only meant for the holder in order to properly present the credential to the issuer, and MAY define a verification method other than the `cdv` public key.
 
 The holder will typically only offer credentials to a relying party which it understands and can properly prompt the user to consent to release. Issuers offer credentials in the formats they support, containing the attributes they can assert about the subject. Validators indicate that they require a certain set of attributes along with the credential formats they support to receive them.
 
