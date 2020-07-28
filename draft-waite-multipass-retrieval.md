@@ -92,7 +92,7 @@ abstract
 
 User authentication and attributes are exchanged online today between organizations based on bilateral business arrangements, with user consent and privacy provided as desired by the organization(s) involved.
 
-MultiPass is a system intended for an organization to issue credentials unilaterally, where other organizations can evaluate credentials without having a relationship to the issuing party. This is accomplished by leveraging a software agent, which allows this exchange to be done in a manner which can respect user privacy and support informed decisions around disclosure.
+Multipass is a system intended for an organization to issue credentials unilaterally, where other organizations can evaluate credentials without having a relationship to the issuing party. This is accomplished by leveraging a software agent, which allows this exchange to be done in a manner which can respect user privacy and support informed decisions around disclosure.
 
 This specification provides a mechanism to retrieve single-use tickets, which bundle cryptographically secure credentials in a non-correlatable, selectively disclosable manner.
 
