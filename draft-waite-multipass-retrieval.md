@@ -352,7 +352,7 @@ jwks_uri:
 retrieval_endpoint:
 :  REQUIRED. The `https` scheme URL of the multipass endpoint.
 holder_cnf_alg_values_supported:
-:  OPTIONAL. JSON array containing a list of the JWS signing algorithms which can be embedded into a multipass ticket for subject confirmation. Omitting this value is equivilant to specifying a single algorithm of `ES256` (ECDSA using P-256 and SHA-256). It is RECOMMENDED that `ES256` be supported for compatibility.
+:  OPTIONAL. JSON array containing a list of JWS signing algorithms which can be supplied by the holder and used during presentation. Omitting this value is equivilant to specifying a single algorithm of `ES256` (ECDSA using P-256 and SHA-256). It is RECOMMENDED that `ES256` be supported for compatibility.
 
 ### Multipass Ticket Request
 
@@ -386,7 +386,7 @@ The Multipass Presentation is the data model to be leveraged by profiles describ
 
 A Presentation Request is represented by an object with several keys: TBD
 
-### Presentation Request
+### Presentation Response
 
 ## Future Considerations
 
