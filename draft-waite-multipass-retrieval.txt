@@ -9,7 +9,7 @@ Expires: 28 January 2021
 
 
                        Multipass Ticket Retrieval
-                   draft-waite-multipass-retrieval-00
+                 draft-waite-multipass-retrieval-latest
 
 Abstract
 

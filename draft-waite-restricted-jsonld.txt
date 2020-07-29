@@ -9,7 +9,7 @@ Expires: 12 January 2021
 
 
                 MultiPass Restricted JSON-LD Attributes
-                     draft-waite-restricted-jsonld
+                  draft-waite-restricted-jsonld-latest
 
 Abstract
 
