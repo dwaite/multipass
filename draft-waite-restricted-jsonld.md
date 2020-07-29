@@ -1,7 +1,7 @@
 ---
 title: MultiPass Restricted JSON-LD Attributes
 abbrev: MultiPass attributes
-docname: draft-waite-restricted-jsonld
+docname: draft-waite-restricted-jsonld-latest
 date: 2020-07-11
 category: exp
 
