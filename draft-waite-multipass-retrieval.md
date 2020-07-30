@@ -257,7 +257,7 @@ A multipass container is single-use cryptographic package used to form a credent
 ~~~~~~~~~~ text/plain
 +------------------------------------------+
 |                                          |
-|             Multipass Container             |
+|             Multipass Container          |
 |                                          |
 | +--------------------------------------+ |
 | |                                      | |
