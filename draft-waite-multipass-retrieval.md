@@ -1,5 +1,5 @@
 ---
-title: Multipass Ticket Retrieval
+title: Multipass Container Retrieval
 abbrev: Multipass Retrieval
 docname: draft-waite-multipass-retrieval-latest
 date: 2020-07-27
@@ -94,7 +94,7 @@ User authentication and attributes are exchanged online today between organizati
 
 Multipass is a system intended for an organization to issue credentials unilaterally, where other organizations can evaluate credentials without having a relationship to the issuing party. This is accomplished by leveraging a software agent, which allows this exchange to be done in a manner that is able to respect user privacy and support informed decisions around disclosure.
 
-This specification provides a mechanism to retrieve single-use tickets, which bundle cryptographically secure credentials in a non-correlatable, selectively disclosable manner.
+This specification provides a mechanism to retrieve single-use containers, which bundle cryptographically secure credentials in a non-correlatable, selectively disclosable manner.
 
 ---
 middle
@@ -106,11 +106,11 @@ Existing multi-organizatinal identity systems such as SAML ({{OASIS.saml-core-2.
 
 Verifiable Credential systems {{W3C.REC-vc-data-model-20191119}} aim to introduce a new role into the system, that of a software agent which mediates this exchange of information about the user. This agent decouples the entities from needing a business relationship, as well as takes responsibility for protecting privacy and providing the user with the opportunity for informed disclosure and consent.
 
-This specification describes a container for retrieving a set of credentials from a single issuer, known as a *Multipass Ticket*. These tickets are single use, cryptographically verifiable statements by a particular issuer. For compatibility with existing identity systems, this issuer acts as a protected resource under the OAuth 2.0 Authorization Framework described in ({{OAUTH2}}). There may be other methods for retrieving multipass tickets, which are out of scope of this specification.
+This specification describes the process for retrieving and handling a set of credentials from a single issuer, known as a *Multipass Container*. These containers are single use, cryptographically verifiable statements by a particular issuer. For compatibility with existing identity systems, this issuer acts as a protected resource under the OAuth 2.0 Authorization Framework described in ({{OAUTH2}}). There may be other methods for retrieving multipass containers, which are out of scope of this specification.
 
-This specification also defines mechanisms to prove possession of a key associated with the ticket to the relying party, and for verifying the credentials were asserted by the issuer.
+This specification also defines mechanisms to prove possession of a key associated with the container to the relying party, and for verifying the credentials were asserted by the issuer.
 
-Finally, this specification describes the data expected in a request by a party for credentials, as well as the cryptographic format of the presentation of those credentials back to the requesting party. This specification does not define a profile for requesting or sending multipass tickets to recipients, which may operate in roles such as "Relying Parties" or "Verifiers" within such profiles.
+Finally, this specification describes the data expected in a request by a party for credentials, as well as the cryptographic format of the presentation of those credentials back to the requesting party. This specification does not define a profile for requesting or sending multipass containers to recipients, which may operate in roles such as "Relying Parties" or "Verifiers" within such profiles.
 
 ## Notational Conventions
 
@@ -129,8 +129,8 @@ Credential:
 Selective Disclosure:
 : In the context of set of credentials, or of an individual credential format which supports selective disclosure, the ability to release just a subset of the amount of information available when given to a verifier.
 
-Ticket:
-: In this context, a multipass ticket. A cryptographic message with a mechanism to verify proof of possession by the holder, and to define how to verify credentials are being asserted by the issuer. To prevent correlation between parties, this ticket is meant to be single-use.
+Container:
+: In this context, a multipass container. A cryptographic message with a mechanism to verify proof of possession by the holder, and to define how to verify credentials are being asserted by the issuer. To prevent correlation between parties, this container is meant to be single-use.
 
 ## Roles
 
@@ -158,10 +158,10 @@ Subject:
 : An entity being described by the issue, such as the OAuth resource owner/end-user.
 
 Holder:
-: An application which acts as a client, requesting and holding onto multipass tickets on behalf of the subject. This may also be referred to sometimes as a "wallet." This application may be operated by a party other than the subject.
+: An application which acts as a client, requesting and holding onto multipass containers on behalf of the subject. This may also be referred to sometimes as a "wallet." This application may be operated by a party other than the subject.
 
 Issuer:
-: An application issuing multipass tickets to the holder. In the context of this specification, this entity is an OAuth 2 protected resource. This party issues tickets containing credentials which other parties trust.
+: An application issuing multipass containers to the holder. In the context of this specification, this entity is an OAuth 2 protected resource. This party issues containers containing credentials which other parties trust.
 
 Verifier:
 : An application requesting credentials which meet certain requirements, such as which issuers are supplying them, and which can verify the presented credentials.
@@ -186,13 +186,13 @@ Verifier:
 |              |  5. Request multipass        +---------------+
 |              |  ------------------------>   |               |
 |              |                              |   Multipass   |
-|              |  6. Return generated ticket  |   Endpoint    |
+|              |  6. Return generated container  |   Endpoint    |
 |              |  <------------------------   |               |
 +--------------+                              +---------------+
 ~~~~~~~~~~
 {: #fig-retrieval-flow title="Retrieval Flow"}
 
-The abstract flow illustrated in {{fig-retrieval-flow}} describes the interaction between the holder, authorization server and issuer to retrieve tickets.
+The abstract flow illustrated in {{fig-retrieval-flow}} describes the interaction between the holder, authorization server and issuer to retrieve containers.
 
 1. The Holder retrieves metadata for the issuer to understand the requirements and capabilities of that issuer.
 
@@ -202,13 +202,13 @@ The abstract flow illustrated in {{fig-retrieval-flow}} describes the interactio
 
 4. The Authorization Server returns an access token and optional refresh token to the holder.
 
-5. The Holder requests a multipass ticket from the Multipass Endpoint using the access token, leveraging the previously discovered metadata. This request includes an ephemeral public key, which should be unique per request and be different from any cryptographic keys which might be used as part of client authorization to the Authorization Server or for access token usage.
+5. The Holder requests a multipass container from the Multipass Endpoint using the access token, leveraging the previously discovered metadata. This request includes an ephemeral public key, which should be unique per request and be different from any cryptographic keys which might be used as part of client authorization to the Authorization Server or for access token usage.
 
-6. The issuer returns a generated single-use multipass ticket, bound to the supplied ephemeral key for proof of possession.
+6. The issuer returns a generated single-use multipass container, bound to the supplied ephemeral key for proof of possession.
 
-Verifiers request credentials be presented to them from a holder and asserted by an issuer with appropriate cryptographic proof. The presentation is constructed by the holder based on statements from the issuer contained within the multipass ticket and from the credentials asserted by the issuer.
+Verifiers request credentials be presented to them from a holder and asserted by an issuer with appropriate cryptographic proof. The presentation is constructed by the holder based on statements from the issuer contained within the multipass container and from the credentials asserted by the issuer.
 
-The selected multipass ticket may already have been retrieved and cached for later use (within the validity period of the ticket), or may be retrieved on demand as part of the process of answering the validator's request.
+The selected multipass container may already have been retrieved and cached for later use (within the validity period of the container), or may be retrieved on demand as part of the process of answering the validator's request.
 
 ~~~~~~~ text/plain
 +--------------+  1. Request presentation     +---------------+
@@ -250,14 +250,14 @@ The selected multipass ticket may already have been retrieved and cached for lat
 
 6. Using the presentation and issuer metadata, the verifier is then able to verify the cryptographic message and make a determination of whether its policy will allow it to trust the presented credentials.
 
-## Multipass Ticket Format
+## Multipass Container Format
 
-A multipass ticket is single-use cryptographic package used to form a credential presentation to a verifier from an issuer via a holder. It consists of a collection of individually packaged credentials about the subject, which may be selectively disclosed to minimally meet the needs of the verifier and protect the privacy of the subject.
+A multipass container is single-use cryptographic package used to form a credential presentation to a verifier from an issuer via a holder. It consists of a collection of individually packaged credentials about the subject, which may be selectively disclosed to minimally meet the needs of the verifier and protect the privacy of the subject.
 
 ~~~~~~~~~~ text/plain
 +------------------------------------------+
 |                                          |
-|             Multipass Ticket             |
+|             Multipass Container             |
 |                                          |
 | +--------------------------------------+ |
 | |                                      | |
@@ -295,7 +295,7 @@ exp
 :    REQUIRED. The expiration time after which the multipass MUST NOT be presented to a verifier and MUST NOT be accepted by a verifier for processing.  A holder MAY use expiry to proactively acquire one or more new multipasses. The expiration SHOULD take into account the validity period of associated credentials. It is RECOMMENDED that expiry times have low precision or other mechanisms to prevent statistical correlation of multiple passes retrieved by the holder simultaneously.
 
 jti
-:    OPTIONAL. A unique identifier for the JWT. It MAY be used for communicating out-of-band from a verifier to an issuer about this multipass and the associated subject (such as in the case of abuse). It MUST NOT contain any information about the subject that could be used to correlate multiple tickets.
+:    OPTIONAL. A unique identifier for the JWT. It MAY be used for communicating out-of-band from a verifier to an issuer about this multipass and the associated subject (such as in the case of abuse). It MUST NOT contain any information about the subject that could be used to correlate multiple containers.
 
 cnf
 :    REQUIRED. Used to provide proof-of-possession of the holder to the verifier. It is RECOMMENDED that this be a public key in the form of a point on the P-256 curve.
@@ -309,9 +309,9 @@ As a specific example, this information MUST NOT indicate the subject belong to 
 
 ## Credentials
 
-A multipass ticket is an assertion by the issuer of one or more credentials about the subject, which may be selectively disclosed by the holder to a verifier. Selective disclosure allows for presented credentials to be limited to only the information requested by a verifier. In addition to selecting which credentials are disclosed, some credential formats MAY also allow portions of the credential to be selectively disclosed.
+A multipass container is an assertion by the issuer of one or more credentials about the subject, which may be selectively disclosed by the holder to a verifier. Selective disclosure allows for presented credentials to be limited to only the information requested by a verifier. In addition to selecting which credentials are disclosed, some credential formats MAY also allow portions of the credential to be selectively disclosed.
 
-The format of a credential data is out of scope of this specification, outside of providing the credential validation object (`cdv`) in the issued ticket. The credential validation object contains an ephemeral public key (as a `jwk` property) which is leveraged by some credential formats to verify that credential data is asserted by the issuer. The credential data MAY contain information only meant for the holder in order to properly present the credential to the issuer, and MAY define a verification method other than the `cdv` public key.
+The format of a credential data is out of scope of this specification, outside of providing the credential validation object (`cdv`) in the issued container. The credential validation object contains an ephemeral public key (as a `jwk` property) which is leveraged by some credential formats to verify that credential data is asserted by the issuer. The credential data MAY contain information only meant for the holder in order to properly present the credential to the issuer, and MAY define a verification method other than the `cdv` public key.
 
 The holder will typically only offer credentials to a relying party which it understands and can properly prompt the user to consent to release. Issuers offer credentials in the formats they support, containing the attributes they can assert about the subject. Validators indicate that they require a certain set of attributes along with the credential formats they support to receive them.
 
@@ -329,7 +329,7 @@ A credential format MAY impact all stages of the multipass protocol described be
 
 1. Declare metadata on how it is meant to be used, such as supported cryptographic properties or potentially available attributes about subjects.
 2. Support or require information on the multipass request from the holder to the issuer.
-3. Provide information in the multipass ticket, such as credential data to include in a presentation or information the holder needs to properly present the credential.
+3. Provide information in the multipass container, such as credential data to include in a presentation or information the holder needs to properly present the credential.
 4. Define parameters in a presentation request, such as the list of required attributes for service. Such a list could affect the UX of the holder, allow for selective disclosure, or result in a presentation request being rejected as being unable to be met.
 5. Define the mechanism to present the credential to the verifier.
 
@@ -355,9 +355,9 @@ retrieval_endpoint:
 holder_cnf_alg_values_supported:
 :  OPTIONAL. JSON array containing a list of JWS signing algorithms which can be supplied by the holder and used during presentation. Omitting this value is equivilant to specifying a single algorithm of `ES256` (ECDSA using P-256 and SHA-256). It is RECOMMENDED that `ES256` be supported for compatibility.
 
-### Multipass Ticket Request
+### Multipass Container Request
 
-Given an appropriate access token, the holder requests a multipass ticket via POST to the multipass ticket endpoint.
+Given an appropriate access token, the holder requests a multipass container via POST to the multipass container endpoint.
 
 The parameters of the request are:
 
@@ -368,9 +368,9 @@ holder_jwk:
 credentials_requested:
 :     OPTIONAL. A dictionary of credential formats. The value of this dictionary is defined by the credential format, but MAY support `true` as a default configuration and MUST use `true` if no configuration is defined for a given credential format. An issuer takes this as advice, and MAY return more credentials than requested or omit requested credential formats.
 
-### Multipass Ticket Response
+### Multipass Container Response
 
-The multipass ticket response consists of a JSON {{JSON}} object body with keys representing the issuer statement and credentials. These values are used by the holder to assemble a multipass presentation.
+The multipass container response consists of a JSON {{JSON}} object body with keys representing the issuer statement and credentials. These values are used by the holder to assemble a multipass presentation.
 
 {: vspace="0"}
 issuer_statement:
@@ -410,13 +410,13 @@ optional_credentials:
 
 ### Presentation
 
-A presentation is the successful response to a relying party's presentation request. It is a signed {{JWT}}, protected by the ephemeral keypair represented within the issuer statement of a multipass ticket.
+A presentation is the successful response to a relying party's presentation request. It is a signed {{JWT}}, protected by the ephemeral keypair represented within the issuer statement of a multipass container.
 
 The JWT contains the following claims:
 
 {: vspace="0"}
 issuer_statement:
-: REQUIRED. The JWT issuer statement within the multipass ticket
+: REQUIRED. The JWT issuer statement within the multipass container
 
 credentials:
 : REQUIRED. An object representing all returned credentials. The keys of the object reference credential formats by name, while the corresponding values hold any mandated data.
@@ -431,11 +431,11 @@ challenge:
 
 ## Future Considerations
 
-A future system may support multi-use tickets by leveraging a different cryptographic protocol, such as anonymous credentials ({{ANONCRED}}). However, the difference in security is such that this likely will be a separate specification.
+A future system may support multi-use containers by leveraging a different cryptographic protocol, such as anonymous credentials ({{ANONCRED}}). However, the difference in security is such that this likely will be a separate specification.
 
 This system does not attempt to resolve the ability of the issuer and validator to collude to determine the identity of the subject.  In addition to a `jti` claim in the issuer statements, the issuer could use the uniqueness of the statements themselves to correlate any statement to a particular issuance and the corresponding holder and subject.
 
-The ticket itself does not have a revocation mechanism, instead leveraging the expiry of the tickets themselves. Accordingly, tickets should have short expirations that properly accomodate potential offline or disconnected use cases.
+The container itself does not have a revocation mechanism, instead leveraging the expiry of the containers themselves. Accordingly, containers should have short expirations that properly accomodate potential offline or disconnected use cases.
 
 In addition to requests against issuers, a brokered trust model (requesting an issuer within a network) will likely be desirable.
 
