@@ -1,0 +1,952 @@
+
+
+
+
+None                                                            D. Waite
+Internet-Draft                                             Ping Identity
+Intended status: Experimental                               27 July 2020
+Expires: 28 January 2021
+
+
+                     Multipass Container Retrieval
+                 draft-waite-multipass-retrieval-latest
+
+Abstract
+
+   User authentication and attributes are exchanged online today between
+   organizations based on bilateral business arrangements, with user
+   consent and privacy provided as desired by the organization(s)
+   involved.
+
+   Multipass is a system intended for an organization to issue
+   credentials unilaterally, where other organizations can evaluate
+   credentials without having a relationship to the issuing party.  This
+   is accomplished by leveraging a software agent, which allows this
+   exchange to be done in a manner that is able to respect user privacy
+   and support informed decisions around disclosure.
+
+   This specification provides a mechanism to retrieve single-use
+   containers, which bundle cryptographically secure credentials in a
+   non-correlatable, selectively disclosable manner.
+
+Status of This Memo
+
+   This Internet-Draft is submitted in full conformance with the
+   provisions of BCP 78 and BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF).  Note that other groups may also distribute
+   working documents as Internet-Drafts.  The list of current Internet-
+   Drafts is at https://datatracker.ietf.org/drafts/current/.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   This Internet-Draft will expire on 28 January 2021.
+
+Copyright Notice
+
+   Copyright (c) 2020 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+
+
+Waite                    Expires 28 January 2021                [Page 1]
+
+Internet-Draft             Multipass Retrieval                 July 2020
+
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents (https://trustee.ietf.org/
+   license-info) in effect on the date of publication of this document.
+   Please review these documents carefully, as they describe your rights
+   and restrictions with respect to this document.  Code Components
+   extracted from this document must include Simplified BSD License text
+   as described in Section 4.e of the Trust Legal Provisions and are
+   provided without warranty as described in the Simplified BSD License.
+
+Table of Contents
+
+   1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   2
+     1.1.  Notational Conventions  . . . . . . . . . . . . . . . . .   3
+     1.2.  Roles . . . . . . . . . . . . . . . . . . . . . . . . . .   4
+     1.3.  Protocol Flow . . . . . . . . . . . . . . . . . . . . . .   5
+     1.4.  Multipass Container Format  . . . . . . . . . . . . . . .   8
+       1.4.1.  Issuer Statement  . . . . . . . . . . . . . . . . . .   8
+     1.5.  Credentials . . . . . . . . . . . . . . . . . . . . . . .  10
+       1.5.1.  Credential Format Requirements  . . . . . . . . . . .  10
+     1.6.  Multipass Protocol  . . . . . . . . . . . . . . . . . . .  11
+       1.6.1.  Multipass Metadata Endpoint . . . . . . . . . . . . .  11
+       1.6.2.  Multipass Metadata Values . . . . . . . . . . . . . .  11
+       1.6.3.  Multipass Container Request . . . . . . . . . . . . .  12
+       1.6.4.  Multipass Container Response  . . . . . . . . . . . .  13
+     1.7.  Multipass Presentation  . . . . . . . . . . . . . . . . .  13
+       1.7.1.  Presentation Request  . . . . . . . . . . . . . . . .  13
+       1.7.2.  Presentation  . . . . . . . . . . . . . . . . . . . .  14
+     1.8.  Future Considerations . . . . . . . . . . . . . . . . . .  15
+   2.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  15
+     2.1.  Normative References  . . . . . . . . . . . . . . . . . .  16
+     2.2.  Informative References  . . . . . . . . . . . . . . . . .  16
+   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .  17
+
+1.  Introduction
+
+   Existing multi-organizatinal identity systems such as SAML
+   ([OASIS.saml-core-2.0-os]) and OpenID Connect ([OpenID.Core]) are
+   designed to share authentication information and claims about the
+   user across organizations.  The basis for this exchange is typically
+   a bilateral business relationship and mutual trust between the
+   organizations.  The user may or may not have been informed of have
+   consented to this disclosure, depending on the policies and the
+   regulations that the entities operate under.
+
+
+
+
+
+
+
+
+Waite                    Expires 28 January 2021                [Page 2]
+
+Internet-Draft             Multipass Retrieval                 July 2020
+
+
+   Verifiable Credential systems [W3C.REC-vc-data-model-20191119] aim to
+   introduce a new role into the system, that of a software agent which
+   mediates this exchange of information about the user.  This agent
+   decouples the entities from needing a business relationship, as well
+   as takes responsibility for protecting privacy and providing the user
+   with the opportunity for informed disclosure and consent.
+
+   This specification describes the process for retrieving and handling
+   a set of credentials from a single issuer, known as a _Multipass
+   Container_. These containers are single use, cryptographically
+   verifiable statements by a particular issuer.  For compatibility with
+   existing identity systems, this issuer acts as a protected resource
+   under the OAuth 2.0 Authorization Framework described in ([OAUTH2]).
+   There may be other methods for retrieving multipass containers, which
+   are out of scope of this specification.
+
+   This specification also defines mechanisms to prove possession of a
+   key associated with the container to the relying party, and for
+   verifying the credentials were asserted by the issuer.
+
+   Finally, this specification describes the data expected in a request
+   by a party for credentials, as well as the cryptographic format of
+   the presentation of those credentials back to the requesting party.
+   This specification does not define a profile for requesting or
+   sending multipass containers to recipients, which may operate in
+   roles such as "Relying Parties" or "Verifiers" within such profiles.
+
+1.1.  Notational Conventions
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+   "OPTIONAL" in this document are to be interpreted as described in
+   BCP 14 [RFC2119] [RFC8174] when, and only when, they appear in all
+   capitals, as shown here.  These words may also appear in this
+   document in lower case as plain English words, absent their normative
+   meanings.
+
+   Certain security-related terms are to be understood in the sense
+   defined in [SECURITY].  These terms include, but are not limited to,
+   "air gap", "anonymity", "assymmetric cryptography", "attribute",
+   "authentication", "authorization", "certificate", "challenge-
+   response", "credential", "data integrity", "domain", "domain name",
+   "enclave", "encryption", "ephemeral key", "expire", "fresh",
+   "identifier", "identity", "identity proofing", "integrity",
+   "privacy", "private key", "proof-of-possession", "protocol", "public
+   key", "repudiation", "sign", "signature", "single sign-on",
+   "steganography", "trust", "validate", "validity period", "verify",
+   and "zero-knowledge proof"
+
+
+
+Waite                    Expires 28 January 2021                [Page 3]
+
+Internet-Draft             Multipass Retrieval                 July 2020
+
+
+   Unless otherwise noted, all the protocol parameter names and values
+   are case sensitive.
+
+   This specification also defines or revises the following terms:
+
+   Credential:  A data object representing some aspects of the identity
+      of the subject.  This includes (but is not limited to) attributes
+      about the subject, an event associated with the subject,
+      identifiers unique to the subject, a definition of how to
+      authenticate a party as the subject, and authorizations of the
+      subject.  This specification places requirements on credentials
+      but does not dictate a format for these data objects.
+
+   Selective Disclosure:  In the context of set of credentials, or of an
+      individual credential format which supports selective disclosure,
+      the ability to release just a subset of the amount of information
+      available when given to a verifier.
+
+   Container:  In this context, a multipass container.  A cryptographic
+      message with a mechanism to verify proof of possession by the
+      holder, and to define how to verify credentials are being asserted
+      by the issuer.  To prevent correlation between parties, this
+      container is meant to be single-use.
+
+1.2.  Roles
+
+                  requests                  requests
+   +-----------+  multipass  +-----------+ credentials +-----------+
+   |           |<------------|           |<------------|           |
+   |  Issuer   |             |  Holder   |             | Verifier  |
+   |           |------------>|           |------------>|           |
+   +-----------+   issues    +-----------+             +-----------+
+         ^        multipass                 presents
+         |                                 credentials
+         |
+         |                   +-----------+
+         |                   |           |
+         +-------------------|  Subject  |
+                 authorizes  |           |
+                   Holder    +-----------+
+
+                              Figure 1: Roles
+
+   Multipass defines four roles beyond OAuth:
+
+   Subject:  An entity being described by the issue, such as the OAuth
+      resource owner/end-user.
+
+
+
+
+Waite                    Expires 28 January 2021                [Page 4]
+
+Internet-Draft             Multipass Retrieval                 July 2020
+
+
+   Holder:  An application which acts as a client, requesting and
+      holding onto multipass containers on behalf of the subject.  This
+      may also be referred to sometimes as a "wallet."  This application
+      may be operated by a party other than the subject.
+
+   Issuer:  An application issuing multipass containers to the holder.
+      In the context of this specification, this entity is an OAuth 2
+      protected resource.  This party issues containers containing
+      credentials which other parties trust.
+
+   Verifier:  An application requesting credentials which meet certain
+      requirements, such as which issuers are supplying them, and which
+      can verify the presented credentials.
+
+1.3.  Protocol Flow
+
+   +--------------+  1. Discover Metadata        +---------------+
+   |              |  ------------------------>   |               |
+   |              |                              |Issuer Metadata|
+   |              |  2. Return Metadata          |   Endpoint    |
+   |              |  <------------------------   |               |
+   |              |                              +---------------+
+   |              |
+   |              |  3. Authorize Holder         +---------------+
+   |              |  ------------------------>   |               |
+   |    Holder    |                              | Authorization |
+   |              |  4. Return OAuth tokens      |    Server     |
+   |              |  <------------------------   |               |
+   |              |                              +---------------+
+   |              |
+   |              |  5. Request multipass        +---------------+
+   |              |  ------------------------>   |               |
+   |              |                              |   Multipass   |
+   |              |  6. Return generated container  |   Endpoint    |
+   |              |  <------------------------   |               |
+   +--------------+                              +---------------+
+
+                          Figure 2: Retrieval Flow
+
+   The abstract flow illustrated in Figure 2 describes the interaction
+   between the holder, authorization server and issuer to retrieve
+   containers.
+
+   1.  The Holder retrieves metadata for the issuer to understand the
+       requirements and capabilities of that issuer.
+
+   2.  The Metadata Endpoint returns the issuer metadata along with
+       information on the appropriate Authorization Server.
+
+
+
+Waite                    Expires 28 January 2021                [Page 5]
+
+Internet-Draft             Multipass Retrieval                 July 2020
+
+
+   3.  The Holder requests authorization from the Authorization Server
+       as described in ([OAUTH2]), by specifying a scope of "multipass".
+
+   4.  The Authorization Server returns an access token and optional
+       refresh token to the holder.
+
+   5.  The Holder requests a multipass container from the Multipass
+       Endpoint using the access token, leveraging the previously
+       discovered metadata.  This request includes an ephemeral public
+       key, which should be unique per request and be different from any
+       cryptographic keys which might be used as part of client
+       authorization to the Authorization Server or for access token
+       usage.
+
+   6.  The issuer returns a generated single-use multipass container,
+       bound to the supplied ephemeral key for proof of possession.
+
+   Verifiers request credentials be presented to them from a holder and
+   asserted by an issuer with appropriate cryptographic proof.  The
+   presentation is constructed by the holder based on statements from
+   the issuer contained within the multipass container and from the
+   credentials asserted by the issuer.
+
+   The selected multipass container may already have been retrieved and
+   cached for later use (within the validity period of the container),
+   or may be retrieved on demand as part of the process of answering the
+   validator's request.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Waite                    Expires 28 January 2021                [Page 6]
+
+Internet-Draft             Multipass Retrieval                 July 2020
+
+
+   +--------------+  1. Request presentation     +---------------+
+   |              |  ------------------------>   |               |
+   |              |                     +-----   |               |
+   |              |  2. Gather consent  |        |               |
+   |              |  and construct      |        |               |
+   |              |  presentation       |        |    Holder     |
+   |              |                     +---->   |               |
+   |              |                              |               |
+   |              |  3. Return presentation      |               |
+   |              |  <------------------------   |               |
+   |              |                              +---------------+
+   |   Verifier   |
+   |              |
+   |              |  4. Discover Metadata        +---------------+
+   |              |  ------------------------>   |               |
+   |              |                              |Issuer Metadata|
+   |              |  5. Return Metadata          |   Endpoint    |
+   |              |  <------------------------   |               |
+   |              |                              +---------------+
+   |              |  -----+
+   |              |       |  6. Verify presentation
+   |              |       |  and credentials
+   |              |  <----+
+   +--------------+
+
+                            Figure 3: Usage Flow
+
+   1.  The Verifier requests a presentation of credentials, stating its
+       requirements in terms of appropriate issuers, understood
+       credential formats, and/or the attributes desired within those
+       credentials.
+
+   2.  The Holder interacts with the subject to make sure that the
+       subject understands the information requested.  If the user
+       approved disclosure, the holder constructs the presentation of
+       credentials.
+
+   3.  The Holder returns the constructed presentation to the verifier.
+
+   4.  If the verifier does not have appropriate information on the
+       issuer, such as if a cached copy of the metadata has expired or
+       if this issuer is one that the verifier has not previously
+       interacted with, the verifier will fetch the metadata from the
+       issuer.
+
+   5.  The Issuer's metadata endpoint returns the current metadata.
+
+
+
+
+
+Waite                    Expires 28 January 2021                [Page 7]
+
+Internet-Draft             Multipass Retrieval                 July 2020
+
+
+   6.  Using the presentation and issuer metadata, the verifier is then
+       able to verify the cryptographic message and make a determination
+       of whether its policy will allow it to trust the presented
+       credentials.
+
+1.4.  Multipass Container Format
+
+   A multipass container is single-use cryptographic package used to
+   form a credential presentation to a verifier from an issuer via a
+   holder.  It consists of a collection of individually packaged
+   credentials about the subject, which may be selectively disclosed to
+   minimally meet the needs of the verifier and protect the privacy of
+   the subject.
+
+   +------------------------------------------+
+   |                                          |
+   |             Multipass Container          |
+   |                                          |
+   | +--------------------------------------+ |
+   | |                                      | |
+   | |           Issuer Statement           | |
+   | |                                      | |
+   | +--------------------------------------+ |
+   |                                          |
+   | +----------------------------------+     |
+   | |                                  +-+   |
+   | |           Credential Data        | +-+ |
+   | |                                  | | | |
+   | +-+--------------------------------+ | | |
+   |   +-+--------------------------------+ | |
+   |     +----------------------------------+ |
+   |                                          |
+   +------------------------------------------+
+
+                       Figure 4: Multipass Structure
+
+1.4.1.  Issuer Statement
+
+   The Issuer Statement is a signed JWT containing information which is
+   both non-identifying and non-correlating of the user, which will be
+   disclosed to all verifiers.
+
+   The JWT contains the following keys, defined by ([JWT]) and
+   ([JWTPOP])
+
+
+
+
+
+
+
+Waite                    Expires 28 January 2021                [Page 8]
+
+Internet-Draft             Multipass Retrieval                 July 2020
+
+
+   iss
+      REQUIRED.  This value MUST uniquely identifies the issuer.  It
+      SHOULD be a "https" scheme URL usable for metadata discovery per
+      ([OAUTHMETA]).
+
+   aud
+      OPTIONAL.  This value indicates recipient(s) that the JWT is
+      intended for.  If an audience is specified, the multipass MUST NOT
+      be presented to a recipient that is not part of that audience.
+
+   exp
+      REQUIRED.  The expiration time after which the multipass MUST NOT
+      be presented to a verifier and MUST NOT be accepted by a verifier
+      for processing.  A holder MAY use expiry to proactively acquire
+      one or more new multipasses.  The expiration SHOULD take into
+      account the validity period of associated credentials.  It is
+      RECOMMENDED that expiry times have low precision or other
+      mechanisms to prevent statistical correlation of multiple passes
+      retrieved by the holder simultaneously.
+
+   jti
+      OPTIONAL.  A unique identifier for the JWT.  It MAY be used for
+      communicating out-of-band from a verifier to an issuer about this
+      multipass and the associated subject (such as in the case of
+      abuse).  It MUST NOT contain any information about the subject
+      that could be used to correlate multiple containers.
+
+   cnf
+      REQUIRED.  Used to provide proof-of-possession of the holder to
+      the verifier.  It is RECOMMENDED that this be a public key in the
+      form of a point on the P-256 curve.
+
+   cdv
+      OPTIONAL.  Used to provide cryptographic verification of
+      credentials.
+
+   Issuer statements MAY provide additional information.  This
+   additional information MUST NOT contain identity information of the
+   subject, or be usable to uniquely identify the subject or correlate
+   the subject across multiple verifiers.
+
+   As a specific example, this information MUST NOT indicate the subject
+   belong to a subset at a particular issuer who have access to a
+   particular credential, such as by including an additional mechanism
+   to verify that credential format.  The "cdv" property is provided
+   specifically so that that verification information can be included
+   separately from the issuer statement, as part of the credential
+   itself.  The issuer statement MAY include such information if it does
+
+
+
+Waite                    Expires 28 January 2021                [Page 9]
+
+Internet-Draft             Multipass Retrieval                 July 2020
+
+
+   not distinguish the subject as belonging to a subset, but a
+   requirement to do so might serve as a limitation of that credential
+   format in other environments.
+
+1.5.  Credentials
+
+   A multipass container is an assertion by the issuer of one or more
+   credentials about the subject, which may be selectively disclosed by
+   the holder to a verifier.  Selective disclosure allows for presented
+   credentials to be limited to only the information requested by a
+   verifier.  In addition to selecting which credentials are disclosed,
+   some credential formats MAY also allow portions of the credential to
+   be selectively disclosed.
+
+   The format of a credential data is out of scope of this
+   specification, outside of providing the credential validation object
+   ("cdv") in the issued container.  The credential validation object
+   contains an ephemeral public key (as a "jwk" property) which is
+   leveraged by some credential formats to verify that credential data
+   is asserted by the issuer.  The credential data MAY contain
+   information only meant for the holder in order to properly present
+   the credential to the issuer, and MAY define a verification method
+   other than the "cdv" public key.
+
+   The holder will typically only offer credentials to a relying party
+   which it understands and can properly prompt the user to consent to
+   release.  Issuers offer credentials in the formats they support,
+   containing the attributes they can assert about the subject.
+   Validators indicate that they require a certain set of attributes
+   along with the credential formats they support to receive them.
+
+1.5.1.  Credential Format Requirements
+
+   A specification which defines a credential format is RECOMMENDED to
+   define:
+
+   1.  The mechanism for an issuer to create a credential, or how to
+       determine if it should assert a credential from another system or
+       party
+
+   2.  The mechanism for verifying the credential is associated with a
+       presentation, such as a signature by the "cdv" key
+
+   3.  The relationship of the credential with the subject
+
+   4.  The process for a holder creating a presentation of the
+       credential, including leveraging any features the credential may
+       support such as selective disclosure of data
+
+
+
+Waite                    Expires 28 January 2021               [Page 10]
+
+Internet-Draft             Multipass Retrieval                 July 2020
+
+
+   5.  Recommendations on how a holder should present the credential
+       within a UX for informed consent
+
+   A credential format MAY impact all stages of the multipass protocol
+   described below, including:
+
+   1.  Declare metadata on how it is meant to be used, such as supported
+       cryptographic properties or potentially available attributes
+       about subjects.
+
+   2.  Support or require information on the multipass request from the
+       holder to the issuer.
+
+   3.  Provide information in the multipass container, such as
+       credential data to include in a presentation or information the
+       holder needs to properly present the credential.
+
+   4.  Define parameters in a presentation request, such as the list of
+       required attributes for service.  Such a list could affect the UX
+       of the holder, allow for selective disclosure, or result in a
+       presentation request being rejected as being unable to be met.
+
+   5.  Define the mechanism to present the credential to the verifier.
+
+1.6.  Multipass Protocol
+
+1.6.1.  Multipass Metadata Endpoint
+
+   The Multipass Metadata Endpoint builds upon the OAuth Authorization
+   Server Metadata format ([OAUTHMETA].)  When using the OAuth
+   Application Server metadata, the OAuth issuer and Multipass issuer
+   have the same URI name.
+
+   It is RECOMMENDED that metadata be retrieved using the process
+   detailed in Section 3 of [OAUTHMETA], first attempting to resolve the
+   URL suffix "oauth-authorization-server", then attempting to resolve
+   the URL suffix "openid-configuration" using the same process.
+   [OpenID.Core] describes a different, non-standard location for
+   "openid-configuration" metadata when the issuer URL contains a path -
+   Issuers SHOULD NOT assume that Holders or Verifiers will attempt to
+   resolve this location, and SHOULD either move or duplicate their
+   metadata to the location specified by [OAUTHMETA].
+
+1.6.2.  Multipass Metadata Values
+
+   Multipass Metadata values are grouped under a property with the
+   "multipass" metadata name.
+
+
+
+
+Waite                    Expires 28 January 2021               [Page 11]
+
+Internet-Draft             Multipass Retrieval                 July 2020
+
+
+   credentials_supported:
+      REQUIRED.  An object with keys indicating the credential formats
+      available.  The value associated with this key MUST either be
+      defined by teh credential format, or be "true" to indicate
+      support. jwks_uri:
+
+  
+      REQUIRED.  The URI of the JWKS endpoint for the multipass issuer.
+      The multipass issuer has a separate JWKS endpoint from the
+      authorization server to support differing keys, rotated on a
+      different schedule. retrieval_endpoint:
+
+  
+      REQUIRED.  The "https" scheme URL of the multipass endpoint.
+      holder_cnf_alg_values_supported:
+
+  
+      OPTIONAL.  JSON array containing a list of JWS signing algorithms
+      which can be supplied by the holder and used during presentation.
+      Omitting this value is equivilant to specifying a single algorithm
+      of "ES256" (ECDSA using P-256 and SHA-256).  It is RECOMMENDED
+      that "ES256" be supported for compatibility.
+
+1.6.3.  Multipass Container Request
+
+   Given an appropriate access token, the holder requests a multipass
+   container via POST to the multipass container endpoint.
+
+   The parameters of the request are:
+
+   holder_jwk:
+      REQUIRED.  A JSON Web Key ([JWK]) describing the public key of a
+      uniquely generated key pair by the client.  A holder MUST NOT
+      reuse this key pair for multiple passes or for other uses.  For
+      compatibility, is RECOMMENDED that this key use the ES256
+      algorithm specified by [JWA].
+
+   credentials_requested:
+      OPTIONAL.  A dictionary of credential formats.  The value of this
+      dictionary is defined by the credential format, but MAY support
+      "true" as a default configuration and MUST use "true" if no
+      configuration is defined for a given credential format.  An issuer
+      takes this as advice, and MAY return more credentials than
+      requested or omit requested credential formats.
+
+
+
+
+
+
+
+Waite                    Expires 28 January 2021               [Page 12]
+
+Internet-Draft             Multipass Retrieval                 July 2020
+
+
+1.6.4.  Multipass Container Response
+
+   The multipass container response consists of a JSON [JSON] object
+   body with keys representing the issuer statement and credentials.
+   These values are used by the holder to assemble a multipass
+   presentation.
+
+   issuer_statement:
+      REQUIRED.  A JWT from the issuer to be sent with the presentation,
+      as described in Issuer Statement (Section 1.4.1)
+
+   credentials:
+      REQUIRED.  A dictionary of credentials, with keys indicating
+      credential formats.  The credential format describes both the
+      structure of the credential and how to present it.  For example,
+      the value of a credential format may be a string holding a compact
+      JWS message, signed using the key described by the "cdv" claim.
+
+1.7.  Multipass Presentation
+
+   A relying party interacts with this system by requesting credentials
+   from a holder, and being either presented back with those credentials
+   or being given an error.  This specification details the data format
+   used for this request and the resulting presentation, while the
+   semantics of the communication channel between the relying part and
+   holder are considered out of scope.
+
+1.7.1.  Presentation Request
+
+   A Presentation Request is represented by an object with several keys.
+
+   rpid:
+      REQUIRED.  A valid domain string which identifies the relying
+      party.  Credentials are only meant for this relying party, and a
+      credential format MAY restrict itself to only being readable by
+      this relying party.
+
+  
+      The communications channel SHOULD guarantee the relying party
+      initiating the request corresponds to the "rpid" parameter.  For a
+      relying party with a HTTPS identifier, this value should be the
+      relying party's effective domain
+      (https://html.spec.whatwg.org/multipage/origin.html#concept-
+      origin-effective-domain) or a registrable domain suffix of that
+      effective domain.
+
+   issuers:
+      REQUIRED.  An array of acceptable issuer identifiers.
+
+
+
+Waite                    Expires 28 January 2021               [Page 13]
+
+Internet-Draft             Multipass Retrieval                 July 2020
+
+
+   timeout:
+      OPTIONAL.  The time, in milliseconds, that the relying party is
+      willing to wait for the call to complete.  This is meant as a hint
+      to software providing the transport or the holder functionality,
+      which is given flexibility to select a default or alternative
+      value.
+
+   challenge:
+      REQUIRED.  A binary challenge value to prevent replay attacks.
+      This value MUST be randomly generated by the relying party in a
+      trusted environment, and the value MUST be present in the
+      resulting presentation.
+
+   required_credentials:
+      REQUIRED.  An object representing all required credentials.  The
+      keys of the object reference credential formats by name, while the
+      corresponding values hold any configuration or data requests
+      appropriate for that credential format.  If a credential format
+      does not specify additional request parameters, the corresponding
+      value MUST be "true".
+
+   optional_credentials:
+      OPTIONAL.  An object representing all optional credentials.  The
+      keys of the object reference credential formats by name, while the
+      corresponding value holds any configuration or data requests
+      appropriate for that credential format.  If a credential format
+      does not specify additional request parameters, the corresponding
+      value MUST be "true".
+
+1.7.2.  Presentation
+
+   A presentation is the successful response to a relying party's
+   presentation request.  It is a signed [JWT], protected by the
+   ephemeral keypair represented within the issuer statement of a
+   multipass container.
+
+   The JWT contains the following claims:
+
+   issuer_statement:
+      REQUIRED.  The JWT issuer statement within the multipass container
+
+   credentials:
+      REQUIRED.  An object representing all returned credentials.  The
+      keys of the object reference credential formats by name, while the
+      corresponding values hold any mandated data.
+
+
+
+
+
+
+Waite                    Expires 28 January 2021               [Page 14]
+
+Internet-Draft             Multipass Retrieval                 July 2020
+
+
+      Credentials may be transmitted by value or by reference, and will
+      have their own mechanism for validating they were correctly
+      asserted by the issuer.  One example would be a credential
+      formatted as a JWS, with a signature verifiable using the "cdv"
+      public key.
+
+   rpid:
+      REQUIRED.  The originally requested relying party identifier.
+
+   challenge:
+      REQUIRED.  The originally supplied challenge value, url-safe
+      base64 encoded.
+
+1.8.  Future Considerations
+
+   A future system may support multi-use containers by leveraging a
+   different cryptographic protocol, such as anonymous credentials
+   ([ANONCRED]).  However, the difference in security is such that this
+   likely will be a separate specification.
+
+   This system does not attempt to resolve the ability of the issuer and
+   validator to collude to determine the identity of the subject.  In
+   addition to a "jti" claim in the issuer statements, the issuer could
+   use the uniqueness of the statements themselves to correlate any
+   statement to a particular issuance and the corresponding holder and
+   subject.
+
+   The container itself does not have a revocation mechanism, instead
+   leveraging the expiry of the containers themselves.  Accordingly,
+   containers should have short expirations that properly accomodate
+   potential offline or disconnected use cases.
+
+   In addition to requests against issuers, a brokered trust model
+   (requesting an issuer within a network) will likely be desirable.
+
+   The current presentation response format limits the response to
+   credentials from a single issuer.  It should be possible to extend
+   this presentation response to being from multiple issuers, although
+   some scenarios may make it difficult to use a single ephemeral key.
+
+   The current issuer text is perhaps not flexible enough allow for
+   other kinds of issuers, such as local (self-asserted) information or
+   the use of a local authentication credential such as a client
+   certificate or FIDO authenticator.  The intention is that these would
+   be possible within the framework described.
+
+2.  References
+
+
+
+
+Waite                    Expires 28 January 2021               [Page 15]
+
+Internet-Draft             Multipass Retrieval                 July 2020
+
+
+2.1.  Normative References
+
+   [JSON]     Bray, T., Ed., "The JavaScript Object Notation (JSON) Data
+              Interchange Format", RFC 7159, DOI 10.17487/RFC7159, March
+              2014, <https://www.rfc-editor.org/info/rfc7159>.
+
+   [JWA]      Jones, M., "JSON Web Algorithms (JWA)", RFC 7518,
+              DOI 10.17487/RFC7518, May 2015,
+              <https://www.rfc-editor.org/info/rfc7518>.
+
+   [JWK]      Jones, M., "JSON Web Key (JWK)", RFC 7517,
+              DOI 10.17487/RFC7517, May 2015,
+              <https://www.rfc-editor.org/info/rfc7517>.
+
+   [JWT]      Jones, M., Bradley, J., and N. Sakimura, "JSON Web Token
+              (JWT)", RFC 7519, DOI 10.17487/RFC7519, May 2015,
+              <https://www.rfc-editor.org/info/rfc7519>.
+
+   [OAUTH2]   Hardt, D., Ed., "The OAuth 2.0 Authorization Framework",
+              RFC 6749, DOI 10.17487/RFC6749, October 2012,
+              <https://www.rfc-editor.org/info/rfc6749>.
+
+   [OAUTHMETA]
+              Jones, M., Sakimura, N., and J. Bradley, "OAuth 2.0
+              Authorization Server Metadata", RFC 8414,
+              DOI 10.17487/RFC8414, June 2018,
+              <https://www.rfc-editor.org/info/rfc8414>.
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119,
+              DOI 10.17487/RFC2119, March 1997,
+              <https://www.rfc-editor.org/info/rfc2119>.
+
+   [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
+              2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
+              May 2017, <https://www.rfc-editor.org/info/rfc8174>.
+
+   [SECURITY] Shirey, R., "Internet Security Glossary, Version 2",
+              FYI 36, RFC 4949, DOI 10.17487/RFC4949, August 2007,
+              <https://www.rfc-editor.org/info/rfc4949>.
+
+2.2.  Informative References
+
+   [ANONCRED] Camenisch, J. and A. Lysyanskaya, "An Efficient System for
+              Non-trasferable Anonymous Credentials with Optional
+              Anonymity Revocation", 2001,
+              <https://eprint.iacr.org/2001/019.pdf>.
+
+
+
+
+Waite                    Expires 28 January 2021               [Page 16]
+
+Internet-Draft             Multipass Retrieval                 July 2020
+
+
+   [JWTPOP]   Jones, M., Bradley, J., and H. Tschofenig, "Proof-of-
+              Possession Key Semantics for JSON Web Tokens (JWTs)",
+              RFC 7800, DOI 10.17487/RFC7800, April 2016,
+              <https://www.rfc-editor.org/info/rfc7800>.
+
+   [OASIS.saml-core-2.0-os]
+              Cantor, S., Kemp, J., Philpott, R., and E. Maler,
+              "Assertions and Protocol for the OASIS Security Assertion
+              Markup Language (SAML) V2.0", OASIS Standard saml-core-
+              2.0-os, March 2005, <http://docs.oasis-
+              open.org/security/saml/v2.0/saml-core-2.0-os.pdf>.
+
+   [OpenID.Core]
+              Sakimora, N., Bradley, J., Jones, M., de Medeiros, B., and
+              C. Mortimore, "OpenID Connect Core 1.0", November 2014,
+              <https://openiD.net/specs/openiD-connect-core-1_0.html>.
+
+   [W3C.REC-vc-data-model-20191119]
+              Sporny, M., Noble, G., Longley, D., Burnett, D., and B.
+              Zundel, "Verifiable Credentials Data Model 1.0", November
+              2019,
+              <https://www.w3.org/TR/2019/REC-vc-data-model-20191119/>.
+
+Author's Address
+
+   D. Waite
+   Ping Identity
+
+   Email: david@alkaline-solutions.com
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Waite                    Expires 28 January 2021               [Page 17]
