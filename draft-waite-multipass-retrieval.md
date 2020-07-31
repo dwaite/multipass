@@ -18,6 +18,10 @@ author:
     ins: D. Waite
     organization: Ping Identity
     email: david@alkaline-solutions.com
+ -
+    ins: J. Miller
+    organization: Ping Identity
+    email: jmiller@pingidentity.com
 
 normative:
   SECURITY:   RFC4949 # Internet Security Glossary
