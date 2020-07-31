@@ -5,7 +5,7 @@
 None                                                            D. Waite
 Internet-Draft                                                 J. Miller
 Intended status: Experimental                              Ping Identity
-Expires: 28 January 2021                                    27 July 2020
+Expires: 31 January 2021                                    30 July 2020
 
 
                      Multipass Container Retrieval
@@ -44,7 +44,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 28 January 2021.
+   This Internet-Draft will expire on 31 January 2021.
 
 Copyright Notice
 
@@ -53,7 +53,7 @@ Copyright Notice
 
 
 
-Waite & Miller           Expires 28 January 2021                [Page 1]
+Waite & Miller           Expires 31 January 2021                [Page 1]
 
 Internet-Draft             Multipass Retrieval                 July 2020
 
@@ -79,7 +79,7 @@ Table of Contents
        1.5.1.  Credential Format Requirements  . . . . . . . . . . .  10
      1.6.  Multipass Protocol  . . . . . . . . . . . . . . . . . . .  11
        1.6.1.  Multipass Metadata Endpoint . . . . . . . . . . . . .  11
-       1.6.2.  Multipass Metadata Values . . . . . . . . . . . . . .  11
+       1.6.2.  Multipass Metadata Values . . . . . . . . . . . . . .  12
        1.6.3.  Multipass Container Request . . . . . . . . . . . . .  12
        1.6.4.  Multipass Container Response  . . . . . . . . . . . .  13
      1.7.  Multipass Presentation  . . . . . . . . . . . . . . . . .  13
@@ -109,7 +109,7 @@ Table of Contents
 
 
 
-Waite & Miller           Expires 28 January 2021                [Page 2]
+Waite & Miller           Expires 31 January 2021                [Page 2]
 
 Internet-Draft             Multipass Retrieval                 July 2020
 
@@ -165,7 +165,7 @@ Internet-Draft             Multipass Retrieval                 July 2020
 
 
 
-Waite & Miller           Expires 28 January 2021                [Page 3]
+Waite & Miller           Expires 31 January 2021                [Page 3]
 
 Internet-Draft             Multipass Retrieval                 July 2020
 
@@ -221,7 +221,7 @@ Internet-Draft             Multipass Retrieval                 July 2020
 
 
 
-Waite & Miller           Expires 28 January 2021                [Page 4]
+Waite & Miller           Expires 31 January 2021                [Page 4]
 
 Internet-Draft             Multipass Retrieval                 July 2020
 
@@ -242,26 +242,26 @@ Internet-Draft             Multipass Retrieval                 July 2020
 
 1.3.  Protocol Flow
 
-   +--------------+  1. Discover Metadata        +---------------+
-   |              |  ------------------------>   |               |
-   |              |                              |Issuer Metadata|
-   |              |  2. Return Metadata          |   Endpoint    |
-   |              |  <------------------------   |               |
-   |              |                              +---------------+
+   +--------------+  1. Discover Metadata          +---------------+
+   |              |  -------------------------->   |               |
+   |              |                                |Issuer Metadata|
+   |              |  2. Return Metadata            |   Endpoint    |
+   |              |  <--------------------------   |               |
+   |              |                                +---------------+
    |              |
-   |              |  3. Authorize Holder         +---------------+
-   |              |  ------------------------>   |               |
-   |    Holder    |                              | Authorization |
-   |              |  4. Return OAuth tokens      |    Server     |
-   |              |  <------------------------   |               |
-   |              |                              +---------------+
+   |              |  3. Authorize Holder           +---------------+
+   |              |  -------------------------->   |               |
+   |    Holder    |                                | Authorization |
+   |              |  4. Return OAuth tokens        |    Server     |
+   |              |  <--------------------------   |               |
+   |              |                                +---------------+
    |              |
-   |              |  5. Request multipass        +---------------+
-   |              |  ------------------------>   |               |
-   |              |                              |   Multipass   |
-   |              |  6. Return generated container  |   Endpoint    |
-   |              |  <------------------------   |               |
-   +--------------+                              +---------------+
+   |              |  5. Request multipass          +---------------+
+   |              |  -------------------------->   |               |
+   |              |                                |   Multipass   |
+   |              |  6. Return generated container |   Endpoint    |
+   |              |  <--------------------------   |               |
+   +--------------+                                +---------------+
 
                           Figure 2: Retrieval Flow
 
@@ -277,7 +277,7 @@ Internet-Draft             Multipass Retrieval                 July 2020
 
 
 
-Waite & Miller           Expires 28 January 2021                [Page 5]
+Waite & Miller           Expires 31 January 2021                [Page 5]
 
 Internet-Draft             Multipass Retrieval                 July 2020
 
@@ -333,7 +333,7 @@ Internet-Draft             Multipass Retrieval                 July 2020
 
 
 
-Waite & Miller           Expires 28 January 2021                [Page 6]
+Waite & Miller           Expires 31 January 2021                [Page 6]
 
 Internet-Draft             Multipass Retrieval                 July 2020
 
@@ -389,7 +389,7 @@ Internet-Draft             Multipass Retrieval                 July 2020
 
 
 
-Waite & Miller           Expires 28 January 2021                [Page 7]
+Waite & Miller           Expires 31 January 2021                [Page 7]
 
 Internet-Draft             Multipass Retrieval                 July 2020
 
@@ -436,7 +436,7 @@ Internet-Draft             Multipass Retrieval                 July 2020
    both non-identifying and non-correlating of the user, which will be
    disclosed to all verifiers.
 
-   The JWT contains the following keys, defined by ([JWT]) and
+   The JWT contains the following claims, defined by ([JWT]) and
    ([JWTPOP])
 
 
@@ -445,7 +445,7 @@ Internet-Draft             Multipass Retrieval                 July 2020
 
 
 
-Waite & Miller           Expires 28 January 2021                [Page 8]
+Waite & Miller           Expires 31 January 2021                [Page 8]
 
 Internet-Draft             Multipass Retrieval                 July 2020
 
@@ -482,9 +482,10 @@ Internet-Draft             Multipass Retrieval                 July 2020
       the verifier.  It is RECOMMENDED that this be a public key in the
       form of a point on the P-256 curve.
 
-   cdv
-      OPTIONAL.  Used to provide cryptographic verification of
-      credentials.
+   The JWT may also contain the following additional claim:
+
+   cdv  OPTIONAL.  A key the issuer may have used for integrity and non-
+      repudiation of credentials.
 
    Issuer statements MAY provide additional information.  This
    additional information MUST NOT contain identity information of the
@@ -497,15 +498,15 @@ Internet-Draft             Multipass Retrieval                 July 2020
    to verify that credential format.  The "cdv" property is provided
    specifically so that that verification information can be included
    separately from the issuer statement, as part of the credential
-   itself.  The issuer statement MAY include such information if it does
 
 
 
-Waite & Miller           Expires 28 January 2021                [Page 9]
+Waite & Miller           Expires 31 January 2021                [Page 9]
 
 Internet-Draft             Multipass Retrieval                 July 2020
 
 
+   itself.  The issuer statement MAY include such information if it does
    not distinguish the subject as belonging to a subset, but a
    requirement to do so might serve as a limitation of that credential
    format in other environments.
@@ -551,16 +552,19 @@ Internet-Draft             Multipass Retrieval                 July 2020
 
    3.  The relationship of the credential with the subject
 
-   4.  The process for a holder creating a presentation of the
-       credential, including leveraging any features the credential may
-       support such as selective disclosure of data
 
 
 
-Waite & Miller           Expires 28 January 2021               [Page 10]
+
+
+Waite & Miller           Expires 31 January 2021               [Page 10]
 
 Internet-Draft             Multipass Retrieval                 July 2020
 
+
+   4.  The process for a holder creating a presentation of the
+       credential, including leveraging any features the credential may
+       support such as selective disclosure of data
 
    5.  Recommendations on how a holder should present the credential
        within a UX for informed consent
@@ -605,36 +609,36 @@ Internet-Draft             Multipass Retrieval                 July 2020
    resolve this location, and SHOULD either move or duplicate their
    metadata to the location specified by [OAUTHMETA].
 
+
+
+
+
+Waite & Miller           Expires 31 January 2021               [Page 11]
+
+Internet-Draft             Multipass Retrieval                 July 2020
+
+
 1.6.2.  Multipass Metadata Values
 
    Multipass Metadata values are grouped under a property with the
    "multipass" metadata name.
 
-
-
-
-Waite & Miller           Expires 28 January 2021               [Page 11]
-
-Internet-Draft             Multipass Retrieval                 July 2020
-
-
    credentials_supported:
       REQUIRED.  An object with keys indicating the credential formats
       available.  The value associated with this key MUST either be
-      defined by teh credential format, or be "true" to indicate
-      support. jwks_uri:
+      defined by the credential format, or be "true" to indicate
+      support.
 
-  
+   jwks_uri:
       REQUIRED.  The URI of the JWKS endpoint for the multipass issuer.
       The multipass issuer has a separate JWKS endpoint from the
       authorization server to support differing keys, rotated on a
-      different schedule. retrieval_endpoint:
+      different schedule.
 
-  
+   retrieval_endpoint:
       REQUIRED.  The "https" scheme URL of the multipass endpoint.
-      holder_cnf_alg_values_supported:
 
-  
+   holder_cnf_alg_values_supported:
       OPTIONAL.  JSON array containing a list of JWS signing algorithms
       which can be supplied by the holder and used during presentation.
       Omitting this value is equivilant to specifying a single algorithm
@@ -665,11 +669,7 @@ Internet-Draft             Multipass Retrieval                 July 2020
 
 
 
-
-
-
-
-Waite & Miller           Expires 28 January 2021               [Page 12]
+Waite & Miller           Expires 31 January 2021               [Page 12]
 
 Internet-Draft             Multipass Retrieval                 July 2020
 
@@ -703,7 +703,8 @@ Internet-Draft             Multipass Retrieval                 July 2020
 
 1.7.1.  Presentation Request
 
-   A Presentation Request is represented by an object with several keys.
+   A Presentation Request is represented by a JSON object with several
+   keys.
 
    rpid:
       REQUIRED.  A valid domain string which identifies the relying
@@ -720,15 +721,17 @@ Internet-Draft             Multipass Retrieval                 July 2020
       origin-effective-domain) or a registrable domain suffix of that
       effective domain.
 
-   issuers:
-      REQUIRED.  An array of acceptable issuer identifiers.
 
 
 
-Waite & Miller           Expires 28 January 2021               [Page 13]
+
+Waite & Miller           Expires 31 January 2021               [Page 13]
 
 Internet-Draft             Multipass Retrieval                 July 2020
 
+
+   issuers:
+      REQUIRED.  An array of acceptable issuer identifiers.
 
    timeout:
       OPTIONAL.  The time, in milliseconds, that the relying party is
@@ -778,10 +781,7 @@ Internet-Draft             Multipass Retrieval                 July 2020
 
 
 
-
-
-
-Waite & Miller           Expires 28 January 2021               [Page 14]
+Waite & Miller           Expires 31 January 2021               [Page 14]
 
 Internet-Draft             Multipass Retrieval                 July 2020
 
@@ -837,7 +837,7 @@ Internet-Draft             Multipass Retrieval                 July 2020
 
 
 
-Waite & Miller           Expires 28 January 2021               [Page 15]
+Waite & Miller           Expires 31 January 2021               [Page 15]
 
 Internet-Draft             Multipass Retrieval                 July 2020
 
@@ -893,7 +893,7 @@ Internet-Draft             Multipass Retrieval                 July 2020
 
 
 
-Waite & Miller           Expires 28 January 2021               [Page 16]
+Waite & Miller           Expires 31 January 2021               [Page 16]
 
 Internet-Draft             Multipass Retrieval                 July 2020
 
@@ -949,4 +949,4 @@ Authors' Addresses
 
 
 
-Waite & Miller           Expires 28 January 2021               [Page 17]
+Waite & Miller           Expires 31 January 2021               [Page 17]
