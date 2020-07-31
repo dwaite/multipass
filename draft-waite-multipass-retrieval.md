@@ -2,7 +2,7 @@
 title: Multipass Container Retrieval
 abbrev: Multipass Retrieval
 docname: draft-waite-multipass-retrieval-latest
-date: 2020-07-27
+date: 2020-07-30
 category: exp
 
 ipr: trust200902
@@ -173,26 +173,26 @@ Verifier:
 ## Protocol Flow
 
 ~~~~~~~~~~ text/plain
-+--------------+  1. Discover Metadata        +---------------+
-|              |  ------------------------>   |               |
-|              |                              |Issuer Metadata|
-|              |  2. Return Metadata          |   Endpoint    |
-|              |  <------------------------   |               |
-|              |                              +---------------+
++--------------+  1. Discover Metadata          +---------------+
+|              |  -------------------------->   |               |
+|              |                                |Issuer Metadata|
+|              |  2. Return Metadata            |   Endpoint    |
+|              |  <--------------------------   |               |
+|              |                                +---------------+
 |              |                                               
-|              |  3. Authorize Holder         +---------------+
-|              |  ------------------------>   |               |
-|    Holder    |                              | Authorization |
-|              |  4. Return OAuth tokens      |    Server     |
-|              |  <------------------------   |               |
-|              |                              +---------------+
+|              |  3. Authorize Holder           +---------------+
+|              |  -------------------------->   |               |
+|    Holder    |                                | Authorization |
+|              |  4. Return OAuth tokens        |    Server     |
+|              |  <--------------------------   |               |
+|              |                                +---------------+
 |              |                                               
-|              |  5. Request multipass        +---------------+
-|              |  ------------------------>   |               |
-|              |                              |   Multipass   |
-|              |  6. Return generated container  |   Endpoint    |
-|              |  <------------------------   |               |
-+--------------+                              +---------------+
+|              |  5. Request multipass          +---------------+
+|              |  -------------------------->   |               |
+|              |                                |   Multipass   |
+|              |  6. Return generated container |   Endpoint    |
+|              |  <--------------------------   |               |
++--------------+                                +---------------+
 ~~~~~~~~~~
 {: #fig-retrieval-flow title="Retrieval Flow"}
 
@@ -286,7 +286,7 @@ A multipass container is single-use cryptographic package used to form a credent
 
 The Issuer Statement is a signed JWT containing information which is both non-identifying and non-correlating of the user, which will be disclosed to all verifiers.
 
-The JWT contains the following keys, defined by ({{JWT}}) and ({{JWTPOP}})
+The JWT contains the following claims, defined by ({{JWT}}) and ({{JWTPOP}})
 
 {: vspace="0"}
 iss
@@ -304,8 +304,10 @@ jti
 cnf
 :    REQUIRED. Used to provide proof-of-possession of the holder to the verifier. It is RECOMMENDED that this be a public key in the form of a point on the P-256 curve.
 
+The JWT may also contain the following additional claim:
+
 cdv
-:    OPTIONAL. Used to provide cryptographic verification of credentials.
+:    OPTIONAL. A key the issuer may have used for integrity and non-repudiation of credentials.
 
 Issuer statements MAY provide additional information. This additional information MUST NOT contain identity information of the subject, or be usable to uniquely identify the subject or correlate the subject across multiple verifiers.
 
@@ -351,11 +353,14 @@ Multipass Metadata values are grouped under a property with the `multipass` meta
 
 {: vspace="0"}
 credentials_supported:
-:  REQUIRED. An object with keys indicating the credential formats available. The value associated with this key MUST either be defined by teh credential format, or be `true` to indicate support.
+:  REQUIRED. An object with keys indicating the credential formats available. The value associated with this key MUST either be defined by the credential format, or be `true` to indicate support.
+
 jwks_uri:
 :  REQUIRED. The URI of the JWKS endpoint for the multipass issuer. The multipass issuer has a separate JWKS endpoint from the authorization server to support differing keys, rotated on a different schedule.
+
 retrieval_endpoint:
 :  REQUIRED. The `https` scheme URL of the multipass endpoint.
+
 holder_cnf_alg_values_supported:
 :  OPTIONAL. JSON array containing a list of JWS signing algorithms which can be supplied by the holder and used during presentation. Omitting this value is equivilant to specifying a single algorithm of `ES256` (ECDSA using P-256 and SHA-256). It is RECOMMENDED that `ES256` be supported for compatibility.
 
@@ -389,7 +394,7 @@ A relying party interacts with this system by requesting credentials from a hold
 
 ### Presentation Request
 
-A Presentation Request is represented by an object with several keys.
+A Presentation Request is represented by a JSON object with several keys.
 
 {: vspace="0"}
 rpid:
