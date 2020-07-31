@@ -3,12 +3,12 @@
 
 
 None                                                            D. Waite
-Internet-Draft                                                 J. Miller
-Intended status: Experimental                              Ping Identity
-Expires: 28 January 2021                                    27 July 2020
+Internet-Draft                                             Ping Identity
+Intended status: Experimental                               27 July 2020
+Expires: 28 January 2021
 
 
-                       Multipass Ticket Retrieval
+                     Multipass Container Retrieval
                  draft-waite-multipass-retrieval-latest
 
 Abstract
@@ -26,8 +26,8 @@ Abstract
    and support informed decisions around disclosure.
 
    This specification provides a mechanism to retrieve single-use
-   tickets, which bundle cryptographically secure credentials in a non-
-   correlatable, selectively disclosable manner.
+   containers, which bundle cryptographically secure credentials in a
+   non-correlatable, selectively disclosable manner.
 
 Status of This Memo
 
@@ -53,7 +53,7 @@ Copyright Notice
 
 
 
-Waite & Miller           Expires 28 January 2021                [Page 1]
+Waite                    Expires 28 January 2021                [Page 1]
 
 Internet-Draft             Multipass Retrieval                 July 2020
 
@@ -73,15 +73,15 @@ Table of Contents
      1.1.  Notational Conventions  . . . . . . . . . . . . . . . . .   3
      1.2.  Roles . . . . . . . . . . . . . . . . . . . . . . . . . .   4
      1.3.  Protocol Flow . . . . . . . . . . . . . . . . . . . . . .   5
-     1.4.  Multipass Ticket Format . . . . . . . . . . . . . . . . .   8
+     1.4.  Multipass Container Format  . . . . . . . . . . . . . . .   8
        1.4.1.  Issuer Statement  . . . . . . . . . . . . . . . . . .   8
      1.5.  Credentials . . . . . . . . . . . . . . . . . . . . . . .  10
        1.5.1.  Credential Format Requirements  . . . . . . . . . . .  10
      1.6.  Multipass Protocol  . . . . . . . . . . . . . . . . . . .  11
        1.6.1.  Multipass Metadata Endpoint . . . . . . . . . . . . .  11
        1.6.2.  Multipass Metadata Values . . . . . . . . . . . . . .  11
-       1.6.3.  Multipass Ticket Request  . . . . . . . . . . . . . .  12
-       1.6.4.  Multipass Ticket Response . . . . . . . . . . . . . .  13
+       1.6.3.  Multipass Container Request . . . . . . . . . . . . .  12
+       1.6.4.  Multipass Container Response  . . . . . . . . . . . .  13
      1.7.  Multipass Presentation  . . . . . . . . . . . . . . . . .  13
        1.7.1.  Presentation Request  . . . . . . . . . . . . . . . .  13
        1.7.2.  Presentation  . . . . . . . . . . . . . . . . . . . .  14
@@ -89,7 +89,7 @@ Table of Contents
    2.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  15
      2.1.  Normative References  . . . . . . . . . . . . . . . . . .  16
      2.2.  Informative References  . . . . . . . . . . . . . . . . .  16
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  17
+   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .  17
 
 1.  Introduction
 
@@ -109,7 +109,7 @@ Table of Contents
 
 
 
-Waite & Miller           Expires 28 January 2021                [Page 2]
+Waite                    Expires 28 January 2021                [Page 2]
 
 Internet-Draft             Multipass Retrieval                 July 2020
 
@@ -121,25 +121,25 @@ Internet-Draft             Multipass Retrieval                 July 2020
    as takes responsibility for protecting privacy and providing the user
    with the opportunity for informed disclosure and consent.
 
-   This specification describes a container for retrieving a set of
-   credentials from a single issuer, known as a _Multipass Ticket_.
-   These tickets are single use, cryptographically verifiable statements
-   by a particular issuer.  For compatibility with existing identity
-   systems, this issuer acts as a protected resource under the OAuth 2.0
-   Authorization Framework described in ([OAUTH2]).  There may be other
-   methods for retrieving multipass tickets, which are out of scope of
-   this specification.
+   This specification describes the process for retrieving and handling
+   a set of credentials from a single issuer, known as a _Multipass
+   Container_. These containers are single use, cryptographically
+   verifiable statements by a particular issuer.  For compatibility with
+   existing identity systems, this issuer acts as a protected resource
+   under the OAuth 2.0 Authorization Framework described in ([OAUTH2]).
+   There may be other methods for retrieving multipass containers, which
+   are out of scope of this specification.
 
    This specification also defines mechanisms to prove possession of a
-   key associated with the ticket to the relying party, and for
+   key associated with the container to the relying party, and for
    verifying the credentials were asserted by the issuer.
 
    Finally, this specification describes the data expected in a request
    by a party for credentials, as well as the cryptographic format of
    the presentation of those credentials back to the requesting party.
    This specification does not define a profile for requesting or
-   sending multipass tickets to recipients, which may operate in roles
-   such as "Relying Parties" or "Verifiers" within such profiles.
+   sending multipass containers to recipients, which may operate in
+   roles such as "Relying Parties" or "Verifiers" within such profiles.
 
 1.1.  Notational Conventions
 
@@ -165,7 +165,7 @@ Internet-Draft             Multipass Retrieval                 July 2020
 
 
 
-Waite & Miller           Expires 28 January 2021                [Page 3]
+Waite                    Expires 28 January 2021                [Page 3]
 
 Internet-Draft             Multipass Retrieval                 July 2020
 
@@ -188,11 +188,11 @@ Internet-Draft             Multipass Retrieval                 July 2020
       the ability to release just a subset of the amount of information
       available when given to a verifier.
 
-   Ticket:  In this context, a multipass ticket.  A cryptographic
+   Container:  In this context, a multipass container.  A cryptographic
       message with a mechanism to verify proof of possession by the
       holder, and to define how to verify credentials are being asserted
       by the issuer.  To prevent correlation between parties, this
-      ticket is meant to be single-use.
+      container is meant to be single-use.
 
 1.2.  Roles
 
@@ -221,19 +221,19 @@ Internet-Draft             Multipass Retrieval                 July 2020
 
 
 
-Waite & Miller           Expires 28 January 2021                [Page 4]
+Waite                    Expires 28 January 2021                [Page 4]
 
 Internet-Draft             Multipass Retrieval                 July 2020
 
 
    Holder:  An application which acts as a client, requesting and
-      holding onto multipass tickets on behalf of the subject.  This may
-      also be referred to sometimes as a "wallet."  This application may
-      be operated by a party other than the subject.
+      holding onto multipass containers on behalf of the subject.  This
+      may also be referred to sometimes as a "wallet."  This application
+      may be operated by a party other than the subject.
 
-   Issuer:  An application issuing multipass tickets to the holder.  In
-      the context of this specification, this entity is an OAuth 2
-      protected resource.  This party issues tickets containing
+   Issuer:  An application issuing multipass containers to the holder.
+      In the context of this specification, this entity is an OAuth 2
+      protected resource.  This party issues containers containing
       credentials which other parties trust.
 
    Verifier:  An application requesting credentials which meet certain
@@ -259,7 +259,7 @@ Internet-Draft             Multipass Retrieval                 July 2020
    |              |  5. Request multipass        +---------------+
    |              |  ------------------------>   |               |
    |              |                              |   Multipass   |
-   |              |  6. Return generated ticket  |   Endpoint    |
+   |              |  6. Return generated container  |   Endpoint    |
    |              |  <------------------------   |               |
    +--------------+                              +---------------+
 
@@ -267,7 +267,7 @@ Internet-Draft             Multipass Retrieval                 July 2020
 
    The abstract flow illustrated in Figure 2 describes the interaction
    between the holder, authorization server and issuer to retrieve
-   tickets.
+   containers.
 
    1.  The Holder retrieves metadata for the issuer to understand the
        requirements and capabilities of that issuer.
@@ -277,7 +277,7 @@ Internet-Draft             Multipass Retrieval                 July 2020
 
 
 
-Waite & Miller           Expires 28 January 2021                [Page 5]
+Waite                    Expires 28 January 2021                [Page 5]
 
 Internet-Draft             Multipass Retrieval                 July 2020
 
@@ -288,7 +288,7 @@ Internet-Draft             Multipass Retrieval                 July 2020
    4.  The Authorization Server returns an access token and optional
        refresh token to the holder.
 
-   5.  The Holder requests a multipass ticket from the Multipass
+   5.  The Holder requests a multipass container from the Multipass
        Endpoint using the access token, leveraging the previously
        discovered metadata.  This request includes an ephemeral public
        key, which should be unique per request and be different from any
@@ -296,18 +296,18 @@ Internet-Draft             Multipass Retrieval                 July 2020
        authorization to the Authorization Server or for access token
        usage.
 
-   6.  The issuer returns a generated single-use multipass ticket, bound
-       to the supplied ephemeral key for proof of possession.
+   6.  The issuer returns a generated single-use multipass container,
+       bound to the supplied ephemeral key for proof of possession.
 
    Verifiers request credentials be presented to them from a holder and
    asserted by an issuer with appropriate cryptographic proof.  The
    presentation is constructed by the holder based on statements from
-   the issuer contained within the multipass ticket and from the
+   the issuer contained within the multipass container and from the
    credentials asserted by the issuer.
 
-   The selected multipass ticket may already have been retrieved and
-   cached for later use (within the validity period of the ticket), or
-   may be retrieved on demand as part of the process of answering the
+   The selected multipass container may already have been retrieved and
+   cached for later use (within the validity period of the container),
+   or may be retrieved on demand as part of the process of answering the
    validator's request.
 
 
@@ -333,7 +333,7 @@ Internet-Draft             Multipass Retrieval                 July 2020
 
 
 
-Waite & Miller           Expires 28 January 2021                [Page 6]
+Waite                    Expires 28 January 2021                [Page 6]
 
 Internet-Draft             Multipass Retrieval                 July 2020
 
@@ -389,7 +389,7 @@ Internet-Draft             Multipass Retrieval                 July 2020
 
 
 
-Waite & Miller           Expires 28 January 2021                [Page 7]
+Waite                    Expires 28 January 2021                [Page 7]
 
 Internet-Draft             Multipass Retrieval                 July 2020
 
@@ -399,18 +399,18 @@ Internet-Draft             Multipass Retrieval                 July 2020
        of whether its policy will allow it to trust the presented
        credentials.
 
-1.4.  Multipass Ticket Format
+1.4.  Multipass Container Format
 
-   A multipass ticket is single-use cryptographic package used to form a
-   credential presentation to a verifier from an issuer via a holder.
-   It consists of a collection of individually packaged credentials
-   about the subject, which may be selectively disclosed to minimally
-   meet the needs of the verifier and protect the privacy of the
-   subject.
+   A multipass container is single-use cryptographic package used to
+   form a credential presentation to a verifier from an issuer via a
+   holder.  It consists of a collection of individually packaged
+   credentials about the subject, which may be selectively disclosed to
+   minimally meet the needs of the verifier and protect the privacy of
+   the subject.
 
    +------------------------------------------+
    |                                          |
-   |             Multipass Ticket             |
+   |             Multipass Container          |
    |                                          |
    | +--------------------------------------+ |
    | |                                      | |
@@ -445,7 +445,7 @@ Internet-Draft             Multipass Retrieval                 July 2020
 
 
 
-Waite & Miller           Expires 28 January 2021                [Page 8]
+Waite                    Expires 28 January 2021                [Page 8]
 
 Internet-Draft             Multipass Retrieval                 July 2020
 
@@ -475,7 +475,7 @@ Internet-Draft             Multipass Retrieval                 July 2020
       communicating out-of-band from a verifier to an issuer about this
       multipass and the associated subject (such as in the case of
       abuse).  It MUST NOT contain any information about the subject
-      that could be used to correlate multiple tickets.
+      that could be used to correlate multiple containers.
 
    cnf
       REQUIRED.  Used to provide proof-of-possession of the holder to
@@ -501,7 +501,7 @@ Internet-Draft             Multipass Retrieval                 July 2020
 
 
 
-Waite & Miller           Expires 28 January 2021                [Page 9]
+Waite                    Expires 28 January 2021                [Page 9]
 
 Internet-Draft             Multipass Retrieval                 July 2020
 
@@ -512,7 +512,7 @@ Internet-Draft             Multipass Retrieval                 July 2020
 
 1.5.  Credentials
 
-   A multipass ticket is an assertion by the issuer of one or more
+   A multipass container is an assertion by the issuer of one or more
    credentials about the subject, which may be selectively disclosed by
    the holder to a verifier.  Selective disclosure allows for presented
    credentials to be limited to only the information requested by a
@@ -522,7 +522,7 @@ Internet-Draft             Multipass Retrieval                 July 2020
 
    The format of a credential data is out of scope of this
    specification, outside of providing the credential validation object
-   ("cdv") in the issued ticket.  The credential validation object
+   ("cdv") in the issued container.  The credential validation object
    contains an ephemeral public key (as a "jwk" property) which is
    leveraged by some credential formats to verify that credential data
    is asserted by the issuer.  The credential data MAY contain
@@ -557,7 +557,7 @@ Internet-Draft             Multipass Retrieval                 July 2020
 
 
 
-Waite & Miller           Expires 28 January 2021               [Page 10]
+Waite                    Expires 28 January 2021               [Page 10]
 
 Internet-Draft             Multipass Retrieval                 July 2020
 
@@ -575,9 +575,9 @@ Internet-Draft             Multipass Retrieval                 July 2020
    2.  Support or require information on the multipass request from the
        holder to the issuer.
 
-   3.  Provide information in the multipass ticket, such as credential
-       data to include in a presentation or information the holder needs
-       to properly present the credential.
+   3.  Provide information in the multipass container, such as
+       credential data to include in a presentation or information the
+       holder needs to properly present the credential.
 
    4.  Define parameters in a presentation request, such as the list of
        required attributes for service.  Such a list could affect the UX
@@ -613,7 +613,7 @@ Internet-Draft             Multipass Retrieval                 July 2020
 
 
 
-Waite & Miller           Expires 28 January 2021               [Page 11]
+Waite                    Expires 28 January 2021               [Page 11]
 
 Internet-Draft             Multipass Retrieval                 July 2020
 
@@ -641,10 +641,10 @@ Internet-Draft             Multipass Retrieval                 July 2020
       of "ES256" (ECDSA using P-256 and SHA-256).  It is RECOMMENDED
       that "ES256" be supported for compatibility.
 
-1.6.3.  Multipass Ticket Request
+1.6.3.  Multipass Container Request
 
    Given an appropriate access token, the holder requests a multipass
-   ticket via POST to the multipass ticket endpoint.
+   container via POST to the multipass container endpoint.
 
    The parameters of the request are:
 
@@ -669,16 +669,17 @@ Internet-Draft             Multipass Retrieval                 July 2020
 
 
 
-Waite & Miller           Expires 28 January 2021               [Page 12]
+Waite                    Expires 28 January 2021               [Page 12]
 
 Internet-Draft             Multipass Retrieval                 July 2020
 
 
-1.6.4.  Multipass Ticket Response
+1.6.4.  Multipass Container Response
 
-   The multipass ticket response consists of a JSON [JSON] object body
-   with keys representing the issuer statement and credentials.  These
-   values are used by the holder to assemble a multipass presentation.
+   The multipass container response consists of a JSON [JSON] object
+   body with keys representing the issuer statement and credentials.
+   These values are used by the holder to assemble a multipass
+   presentation.
 
    issuer_statement:
       REQUIRED.  A JWT from the issuer to be sent with the presentation,
@@ -724,8 +725,7 @@ Internet-Draft             Multipass Retrieval                 July 2020
 
 
 
-
-Waite & Miller           Expires 28 January 2021               [Page 13]
+Waite                    Expires 28 January 2021               [Page 13]
 
 Internet-Draft             Multipass Retrieval                 July 2020
 
@@ -764,12 +764,12 @@ Internet-Draft             Multipass Retrieval                 July 2020
    A presentation is the successful response to a relying party's
    presentation request.  It is a signed [JWT], protected by the
    ephemeral keypair represented within the issuer statement of a
-   multipass ticket.
+   multipass container.
 
    The JWT contains the following claims:
 
    issuer_statement:
-      REQUIRED.  The JWT issuer statement within the multipass ticket
+      REQUIRED.  The JWT issuer statement within the multipass container
 
    credentials:
       REQUIRED.  An object representing all returned credentials.  The
@@ -781,7 +781,7 @@ Internet-Draft             Multipass Retrieval                 July 2020
 
 
 
-Waite & Miller           Expires 28 January 2021               [Page 14]
+Waite                    Expires 28 January 2021               [Page 14]
 
 Internet-Draft             Multipass Retrieval                 July 2020
 
@@ -801,7 +801,7 @@ Internet-Draft             Multipass Retrieval                 July 2020
 
 1.8.  Future Considerations
 
-   A future system may support multi-use tickets by leveraging a
+   A future system may support multi-use containers by leveraging a
    different cryptographic protocol, such as anonymous credentials
    ([ANONCRED]).  However, the difference in security is such that this
    likely will be a separate specification.
@@ -813,9 +813,9 @@ Internet-Draft             Multipass Retrieval                 July 2020
    statement to a particular issuance and the corresponding holder and
    subject.
 
-   The ticket itself does not have a revocation mechanism, instead
-   leveraging the expiry of the tickets themselves.  Accordingly,
-   tickets should have short expirations that properly accomodate
+   The container itself does not have a revocation mechanism, instead
+   leveraging the expiry of the containers themselves.  Accordingly,
+   containers should have short expirations that properly accomodate
    potential offline or disconnected use cases.
 
    In addition to requests against issuers, a brokered trust model
@@ -837,7 +837,7 @@ Internet-Draft             Multipass Retrieval                 July 2020
 
 
 
-Waite & Miller           Expires 28 January 2021               [Page 15]
+Waite                    Expires 28 January 2021               [Page 15]
 
 Internet-Draft             Multipass Retrieval                 July 2020
 
@@ -893,7 +893,7 @@ Internet-Draft             Multipass Retrieval                 July 2020
 
 
 
-Waite & Miller           Expires 28 January 2021               [Page 16]
+Waite                    Expires 28 January 2021               [Page 16]
 
 Internet-Draft             Multipass Retrieval                 July 2020
 
@@ -921,7 +921,7 @@ Internet-Draft             Multipass Retrieval                 July 2020
               2019,
               <https://www.w3.org/TR/2019/REC-vc-data-model-20191119/>.
 
-Authors' Addresses
+Author's Address
 
    D. Waite
    Ping Identity
@@ -929,10 +929,6 @@ Authors' Addresses
    Email: david@alkaline-solutions.com
 
 
-   J. Miller
-   Ping Identity
-
-   Email: jmiller@pingidentity.com
 
 
 
@@ -949,4 +945,8 @@ Authors' Addresses
 
 
 
-Waite & Miller           Expires 28 January 2021               [Page 17]
+
+
+
+
+Waite                    Expires 28 January 2021               [Page 17]
