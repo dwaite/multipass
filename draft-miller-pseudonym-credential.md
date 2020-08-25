@@ -1,8 +1,8 @@
 ---
-title: Multipass Credential Type Template
-abbrev: multicred template
-docname: draft-template-credential-type-latest
-date: 2020-08-20
+title: Multipass Pseudonym Credential Type
+abbrev: pseudonym credential
+docname: draft-miller-pseudonym-credential
+date: 2020-08-24
 category: exp
 
 ipr: trust200902
@@ -92,6 +92,16 @@ informative:
       - ins: J. Camenisch
       - ins: A. Lysyanskaya
     date: 2001
+  PrivacyPass:
+    title: "Privacy Pass: Bypassing Internet Challenges Anonymously"
+    target: https://www.petsymposium.org/2018/files/papers/issue3/popets-2018-0026.pdf
+    author:
+      - ins: A. Davidson
+      - ins: I. Goldberg
+      - ins: N. Sullivan
+      - ins: G. Tankersley
+      - ins: F. Valsorda
+    date: 2018
 
 ---
 abstract
@@ -100,9 +110,7 @@ User authentication and attributes are exchanged online today between organizati
 
 Multipass is a system intended for an organization to issue credentials unilaterally, where other organizations can evaluate credentials without having a relationship to the issuing party. This is accomplished by leveraging a software agent, which allows this exchange to be done in a manner that is able to respect user privacy and support informed decisions around disclosure.
 
-[//]: # "Add a description of the credential type and what the purpose is, e.g. describe how to use a web authentication credential"
-
-This specification defines a credential type to DO STUFF.
+This specification provides a mechanism and credential format for creating a privacy preserving pseudonym that is unique to each combination of a verifier, subject, and issuer.  It builds upon techniques used in Privacy Pass {{PrivacyPass}} and provides a mechanism for secure account linking and recovery with user consent.
 
 ---
 middle
@@ -112,7 +120,7 @@ middle
 
 Multipass describes a process for retrieving and handling a set of credentials from a single issuer, known as a *Multipass Container*. These containers are single use, cryptographically verifiable statements by a particular issuer, containing or referencing credentials of various types - representing user attributes, authentication, and authorization. Multipass also defines mechanisms to prove possession of a key associated with the container to the relying party, and for verifying the credentials were asserted by the issuer.
 
-This specification describes the data expected in a request by a party for a particular type of credential (CREDENTIAL NAME), as well as the cryptographic format of the presentation of this credential back to the requesting party.
+This specification describes the data expected in a request by a holder for a particular type of pseudonym credential, the process to be performed by the holder during a presentation request, as well as the cryptographic format of the resulting presentation back to the verifier.
 
 ## Notational Conventions
 
@@ -127,11 +135,50 @@ This specification also leverages the terms and roles defined in {{draft-waite-m
 
 ## Credential Type
 
-### Overview
+### Overview (WIP)
 
-[//]: # "This section should describe the purpose of the credential, and the relationship of the credential to the subject. It should also define the credential type identifier, which will be the key used for the credential in metadata as well as all requests and responses"
+In addition to normal attribute values from an issuer, there is the concept of the optional release of a pairwise pseudonym. This value is meant to be consistent for a single subject across the lifetime of their relationship with the issuer and to a verifier. The primary purpose of this attribute is to allow for account recovery scenarios when relying on an issuer as an identity proofing service.
 
-Lorem ipsum dolor sit amet.
+#### NIZK-DLEQ
+
+A “Non-Interactive Zero Knowledge proof of Discrete Logarithm Equality” allows one party to prove that two values were signed by the same locally known secret.
+
+We leverage this to allow offline generation of a verifiable pseudonym by the holder without requiring new interactions with the issuer. Without verifiability, the user could generate multiple pseudonyms, allowing them to represent themselves as any number of unique ‘shadow accounts’ to a verifier.
+
+#### Cryptography
+The issuer must give the client a message containing three values:
+1. A randomly generated elliptic curve point 'P'
+1. A correlation secret shared between the issuer and the user, 'u'
+1. The combination of the point and secret, 'uP'
+
+The values P and uP are sent signed by the issuer against an advertised public key. This forms a one time use pseudonym token, and is expected to be bundled into the one-time-use claims token.
+
+When the client wishes to expose a pseudonym with a particular relying party, it calculates a relying party point R. This value is stable, based on the requested value "rpid", hashed to a curve point. This relying party identifier should be unique to a relying party, such as being the scheme and host name of a website, either directly or indirectly through a trust relationship with a particular application. It is expected that this value has the same semantics as WebAuthn, and is the HTTP/HTTPS origin URL of the requesting website.
+1. The client will verify the "rpid" is appropriate for the relying party and hash the value to a point on the curve R
+1. The client will calculate value uR
+1. The client will calculate the (c,s) values for the ZK-DLEQ(R:uR == P:uP)
+1. The client communicates uR, c, s, and the signed message from the issuer containing P and uP with the relying party
+1. The relying party uses its own derivation of R from rpid, the points uR, P and uP, and the DLEQ proof (c,s) to verify uR is using the same secret value as uP
+1. Point uR and the issuer identity are used together as stable, unique identifier by the relying party.
+
+### Security and Privacy Considerations
+
+#### Leaking of secret 'u'
+
+Leaking of the shared secret 'u' does not allow another party to impersonate the user unless the issuer is compromised as well. However, a known value of 'u' allows for a relying party to determine the user's pseudonym for any given rpid.
+
+#### Lack of validation of request from origin corresponding to RPID
+
+Unvalidated use of a rpid allows one party to ask for the pseudonym of another party. It is possible that a wallet will not be able to confirm the calling relying party due to issues such as insufficient platform capabilities in which case an alternative would be for the RPID to be converted to a resolvable JWKS endpoint, which could then be used to encrypt the message to the relying party service.
+
+It is also possible that there would be insufficient information to determine a RPID due to offline usage, in which case the user may need to be adequately informed and consent to unvalidated usage as a fall-back mechanism.
+
+#### Correlation between RP and Issuer
+
+If the issuer can observe value uR, it can attempt to correlate this value by calculating uR against all known values of 'u' across its user accounts. When exposing user identity, the value should not be based solely on uR and public information on the issuer.
+
+For this reason it is recommended that the value uR (or some derivative of uR) is persisted in secret, used solely for account recovery purposes. If public user identifiers are derived from uR, the process should also involve a persistent secret to prevent issuer correlation.
+
 
 ### Security and Privacy
 
