@@ -135,9 +135,16 @@ This specification also leverages the terms and roles defined in {{draft-waite-m
 
 ## Credential Type
 
-### Overview (WIP)
+### Overview
 
-In addition to normal attribute values from an issuer, there is the concept of the optional release of a pairwise pseudonym. This value is meant to be consistent for a single subject across the lifetime of their relationship with the issuer and to a verifier. The primary purpose of this attribute is to allow for account recovery scenarios when relying on an issuer as an identity proofing service.
+Most credentials are created around one or more specific attributes relating to a subject, they are a mechanism of conveying attribute information in some form.  A pseudonym credential is different in that it is unrelated to any other existing attributes, it instead enables the subject to generate a pairwise pseudonym unique to the verifier on demand. This value will be consistent for a single subject across the lifetime of their relationship with the issuer and to the given verifier.
+
+The primary purpose of this pseudonym credential is to support the creation of a new account on a verifier by relying on the subject's relationship with an external issuer, similar to typical social login systems but with significant added privacy.  A key part of such functionality is the ability to recover access to the verifier account, which is satisified here by providing a new pseudonym credential that can be used to proove association with the same pseudonym.
+
+Privacy Pass {{PrivacyPass}} was created as a cryptographic solution for distributing one-time use tokens securely while also protecting the privacy of the token holder from being uniquely tracked and correlated as they use multiple tokens.  A key part of that solution introduces a “discrete logarithm equivalence proof” or DLEQ proof that is used to ensure no hidden tracking is embedded in the tokens.
+
+The DLEQ proof is adapted to this specification to construct secure and privacy preserving pairwise pseudonym credentials.
+
 
 #### NIZK-DLEQ
 
