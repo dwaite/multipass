@@ -118,7 +118,7 @@ middle
 # Introduction
 {:#introduction}
 
-Multipass describes a process for retrieving and handling a set of credentials from a single issuer, known as a *Multipass Container*. These containers are single use, cryptographically verifiable statements by a particular issuer, containing or referencing credentials of various types - representing user attributes, authentication, and authorization. Multipass also defines mechanisms to prove possession of a key associated with the container to the relying party, and for verifying the credentials were asserted by the issuer.
+Multipass describes a process for retrieving and handling a set of credentials from a single issuer, known as a *Multipass Container*. These containers are single use, cryptographically verifiable statements by a particular issuer, containing or referencing credentials of various types - representing subject attributes, authentication, and authorization. Multipass also defines mechanisms to prove possession of a key associated with the container to the verifier, and for verifying the credentials were asserted by the issuer.
 
 This specification describes the data expected in a request by a holder for a particular type of pseudonym credential, the process to be performed by the holder during a presentation request, as well as the cryptographic format of the resulting presentation back to the verifier.
 
@@ -143,42 +143,20 @@ The primary purpose of this pseudonym credential is to support the creation of a
 
 Privacy Pass {{PrivacyPass}} was created as a cryptographic solution for distributing one-time use tokens securely while also protecting the privacy of the token holder from being uniquely tracked and correlated as they use multiple tokens.  A key part of that solution introduces a “discrete logarithm equivalence proof” or DLEQ proof that is used to ensure no hidden tracking is embedded in the tokens.
 
-The DLEQ proof is adapted to this specification to construct secure and privacy preserving pairwise pseudonym credentials.
+The DLEQ proof is adapted to this specification to construct secure and privacy preserving pairwise pseudonym credentials. We leverage this to allow offline generation of a verifiable pseudonym by the holder without requiring new interactions with the issuer. With verifiability, the subject is prevented from generating multiple pseudonyms in an attempt to represent themselves as any number of unique shadow or puppet accounts to a verifier.
 
-
-#### NIZK-DLEQ
-
-A “Non-Interactive Zero Knowledge proof of Discrete Logarithm Equality” allows one party to prove that two values were signed by the same locally known secret.
-
-We leverage this to allow offline generation of a verifiable pseudonym by the holder without requiring new interactions with the issuer. Without verifiability, the user could generate multiple pseudonyms, allowing them to represent themselves as any number of unique ‘shadow accounts’ to a verifier.
-
-#### Cryptography
-The issuer must give the client a message containing three values:
-1. A randomly generated elliptic curve point 'P'
-1. A correlation secret shared between the issuer and the user, 'u'
-1. The combination of the point and secret, 'uP'
-
-The values P and uP are sent signed by the issuer against an advertised public key. This forms a one time use pseudonym token, and is expected to be bundled into the one-time-use claims token.
-
-When the client wishes to expose a pseudonym with a particular relying party, it calculates a relying party point R. This value is stable, based on the requested value "rpid", hashed to a curve point. This relying party identifier should be unique to a relying party, such as being the scheme and host name of a website, either directly or indirectly through a trust relationship with a particular application. It is expected that this value has the same semantics as WebAuthn, and is the HTTP/HTTPS origin URL of the requesting website.
-1. The client will verify the "rpid" is appropriate for the relying party and hash the value to a point on the curve R
-1. The client will calculate value uR
-1. The client will calculate the (c,s) values for the ZK-DLEQ(R:uR == P:uP)
-1. The client communicates uR, c, s, and the signed message from the issuer containing P and uP with the relying party
-1. The relying party uses its own derivation of R from rpid, the points uR, P and uP, and the DLEQ proof (c,s) to verify uR is using the same secret value as uP
-1. Point uR and the issuer identity are used together as stable, unique identifier by the relying party.
 
 ### Security and Privacy Considerations
 
 #### Leaking of secret 'u'
 
-Leaking of the shared secret 'u' does not allow another party to impersonate the user unless the issuer is compromised as well. However, a known value of 'u' allows for a relying party to determine the user's pseudonym for any given rpid.
+Leaking of the shared secret 'u' does not allow another party to impersonate the subject unless the issuer is compromised as well. However, a known value of 'u' allows for a verifier to determine the subject's pseudonym for any given rpid.
 
 #### Lack of validation of request from origin corresponding to RPID
 
-Unvalidated use of a rpid allows one party to ask for the pseudonym of another party. It is possible that a wallet will not be able to confirm the calling relying party due to issues such as insufficient platform capabilities in which case an alternative would be for the RPID to be converted to a resolvable JWKS endpoint, which could then be used to encrypt the message to the relying party service.
+Unvalidated use of a rpid allows one party to ask for the pseudonym of another party. It is possible that a wallet will not be able to confirm the calling verifier due to issues such as insufficient platform capabilities in which case an alternative would be for the RPID to be converted to a resolvable JWKS endpoint, which could then be used to encrypt the message to the verifier service.
 
-It is also possible that there would be insufficient information to determine a RPID due to offline usage, in which case the user may need to be adequately informed and consent to unvalidated usage as a fall-back mechanism.
+It is also possible that there would be insufficient information to determine a RPID due to offline usage, in which case the subject may need to be adequately informed and consent to unvalidated usage as a fall-back mechanism.
 
 #### Correlation between RP and Issuer
 
@@ -186,12 +164,23 @@ If the issuer can observe value uR, it can attempt to correlate this value by ca
 
 For this reason it is recommended that the value uR (or some derivative of uR) is persisted in secret, used solely for account recovery purposes. If public user identifiers are derived from uR, the process should also involve a persistent secret to prevent issuer correlation.
 
+## Non-Interactive Zero Knowledge DLEQ Proof
 
-### Security and Privacy
+The issuer must give the holder a message containing three values:
+1. A randomly generated elliptic curve point 'P'
+1. A correlation secret shared between the issuer and the user, 'u'
+1. The combination of the point and secret, 'uP'
 
-[//]: # "This section should describe the security and privacy properties of the credential, expecially any exceptions to a default expectation of privacy (e.g. can be correlated across uses of multipass)"
+The values P and uP are sent signed by the issuer against an advertised public key. This forms a one time use pseudonym token, and is expected to be bundled into the one-time-use claims token.
 
-Lorem ipsum dolor sit amet.
+When the holder wishes to expose a pseudonym with a particular verifier, it calculates a verifier point R. This value is stable, based on the requested value "rpid", hashed to a curve point. This verifier identifier should be unique to a verifier, such as being the scheme and host name of a website, either directly or indirectly through a trust relationship with a particular application. It is expected that this value has the same semantics as WebAuthn, and is the HTTP/HTTPS origin URL of the requesting website.
+1. The client will verify the "rpid" is appropriate for the verifier and hash the value to a point on the curve R
+1. The client will calculate value uR
+1. The client will calculate the (c,s) values for the ZK-DLEQ(R:uR == P:uP)
+1. The client communicates uR, c, s, and the signed message from the issuer containing P and uP with the verifier
+1. The verifier uses its own derivation of R from rpid, the points uR, P and uP, and the DLEQ proof (c,s) to verify uR is using the same secret value as uP
+1. Point uR and the issuer identity are used together as stable, unique identifier by the verifier.
+
 
 ## Credential Metadata
 
